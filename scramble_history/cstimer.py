@@ -95,5 +95,5 @@ def _parse_scramble(raw: RawScramble) -> Optional[Solve]:
             when=datetime.fromtimestamp(timestamp, tz=timezone.utc),
         )
     except ValueError as e:
-        print(f"Could not parse raw scramble info: {e}", file=sys.stderr)
+        print(f"Could not parse raw scramble info for {raw}: {e}", file=sys.stderr)
         return None
