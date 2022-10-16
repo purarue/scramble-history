@@ -1,10 +1,11 @@
 import sys
 import json
-import warnings
 from decimal import Decimal
 from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple
 from datetime import datetime, timezone
 from pathlib import Path
+
+from .log import logger
 
 
 class Solve(NamedTuple):
@@ -49,7 +50,7 @@ def _parse_blob(f: TextIO) -> List[Session]:
         # is "session1"
         data_key = f"session{session_number}"
         if data_key not in data:
-            warnings.warn(
+            logger.debug(
                 f"Expected session key '{data_key}' in data, ignoring session '{session_val}'"
             )
             continue

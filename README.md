@@ -1,5 +1,7 @@
 # scramble-history
 
+To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
+
 WIP
 
 parses scramble history from cstimer.net and other sources
