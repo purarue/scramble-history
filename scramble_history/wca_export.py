@@ -7,13 +7,13 @@ from pathlib import Path
 from functools import lru_cache
 
 import requests
-import appdirs
+import platformdirs
 
 from .log import logger
 
 
 def cachedir() -> Path:
-    return Path(appdirs.user_cache_dir("wca_export", "seanbreckenridge"))
+    return Path(platformdirs.user_cache_dir("wca_export"))
 
 
 class ExportDownloader:
@@ -32,6 +32,7 @@ class ExportDownloader:
         req = requests.get(self.export_data_url)
         req.raise_for_status()
         data = req.json()
+        assert isinstance(dict, data)
         return data
 
     @property
