@@ -1,16 +1,10 @@
 # scramble-history
 
-To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
-
 WIP
 
+To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
+
 parses scramble history from cstimer.net and other sources
-
-TODO:
-
-- parse scramble codes into names/enum
-- allow dumping parsed data to JSON
-- integrate with <https://github.com/seanbreckenridge/cube-scramble-cli>
 
 ## Installation
 
