@@ -67,7 +67,7 @@ class ExportDownloader:
             r = requests.get(tsv_url, stream=True)
             assert (
                 r.status_code == 200
-            ), f"Failed to create connection to download TSV export"
+            ), "Failed to create connection to download TSV export"
             write_to = ptd / "export.zip"
             with open(write_to, "wb") as f:
                 for chunk in r:
@@ -106,7 +106,7 @@ def _extract_records(wca_user_id: str, results_file: str) -> List[TSV]:
 def parse_user_details(wca_user_id: str) -> None:
     exp = ExportDownloader()
     src = exp.cache_tsv_dir
-    records = _extract_records(wca_user_id, str(src / "WCA_export_Results.tsv"))
+    _extract_records(wca_user_id, str(src / "WCA_export_Results.tsv"))
     # see 'value' rows here for what these mean
     # https://www.worldcubeassociation.org/results/misc/export.html
     #
