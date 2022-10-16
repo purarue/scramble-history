@@ -2,7 +2,7 @@ import shutil
 import tempfile
 import zipfile
 import csv
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, cast
 from pathlib import Path
 from functools import lru_cache
 
@@ -33,7 +33,7 @@ class ExportDownloader:
         req.raise_for_status()
         data = req.json()
         assert isinstance(dict, data)
-        return data
+        return cast(Dict[str, str], data)
 
     @property
     def export_date_path(self) -> Path:
