@@ -1,10 +1,8 @@
 # scramble-history
 
-WIP
-
 To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
 
-parses scramble history from cstimer.net and other sources
+parses scramble history from cstimer.net, cubers.io, twistytimer and the WCA TSV export
 
 ## Installation
 
@@ -16,9 +14,7 @@ To install with pip, run:
 
 To install JSON support: `pip install scramble_history[optional]`
 
-## Usage
-
-### cstimer parser
+## cstimer
 
 To use, export cstimer.net solves to a file, which `scramble_history parse cstimer` accepts as input:
 
@@ -52,7 +48,7 @@ $ scramble_history parse cstimer -j cstimer.json | jq '.[] | select(.raw_scrambl
 
 To save my cstimer data continously in the background, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
 
-### twistytimer | cubers.io
+## twistytimer | cubers.io
 
 Parses the export for the [TwistyTimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US) android app, which [cubers.io](https://www.cubers.io/) also exports to:
 
@@ -70,9 +66,9 @@ $ scramble_history parse twistytimer Backup_2022-10-17_20-19.txt | jq '.[0]'
 }
 ```
 
-### wca results downloader/extractor
+## wca results downloader/extractor
 
-Downloads the TSV export from <https://www.worldcubeassociation.org/results/misc/export.html> and lets you extract records/scrambles from those rounds from the giant TSV files
+Downloads the TSV export from <https://www.worldcubeassociation.org/results/misc/export.html> and lets you extract records/scrambles from those rounds from the giant TSV files for your WCA user ID
 
 Also extracts competition/location data for any competitions you've attended
 
@@ -101,7 +97,7 @@ BayAreaSpeedcubin212019 pyram 1592 1934 -1 2088 1521
 BayAreaSpeedcubin212019 skewb 1272 1999 1924 1222 2143
 ```
 
-### Tests
+## Tests
 
 ```bash
 git clone 'https://github.com/seanbreckenridge/scramble-history'
