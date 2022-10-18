@@ -37,7 +37,7 @@ Out[2]: Solve(scramble="D U2 F2 U' F2 R2 D B2 U' L2 F2 U2 B R U F' L U2 L2 F U'"
 Or to dump to JSON:
 
 ```
-$ scramble_history parse cstimer -j ~/data/cubing/cstimer/1665942943939.json | jq '.[] | select(.raw_scramble_type == "333") | .solves | .[] | "\(.when) \(.solve_time) \(.scramble)"' -r | head
+$ scramble_history parse cstimer -j cstimer.json | jq '.[] | select(.raw_scramble_type == "333") | .solves | .[] | "\(.when) \(.solve_time) \(.scramble)"' -r | head
 2022-10-11T03:24:27+00:00 25.969 F U' F2 U R2 D L2 F2 U B2 D' L2 D2 R F' U R2 D L2 F' L
 2022-10-11T03:25:16+00:00 22.22 R' U' F2 D2 U' F2 L2 U2 F2 U' L B' R' D2 F L' D F L
 2022-10-11T03:26:01+00:00 16.05 D' B' L F U2 F2 U' R2 B U2 D L2 D B2 U' L2 U' F2 L2
@@ -51,6 +51,24 @@ $ scramble_history parse cstimer -j ~/data/cubing/cstimer/1665942943939.json | j
 ```
 
 To save my cstimer data continously in the background, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
+
+### twistytimer | cubers.io
+
+Parses the export for the [TwistyTimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US) android app, which [cubers.io](https://www.cubers.io/) also exports to:
+
+```
+$ scramble_history parse twistytimer Backup_2022-10-17_20-19.txt | jq '.[0]'
+{
+  "puzzle": "333",
+  "category": "Normal",
+  "scramble": "F L2 B' F' D2 R2 D2 F2 L2 U2 F2 R' F' U2 L2 B D L' B U B2",
+  "time": "19.86",
+  "penalty": "0",
+  "dnf": false,
+  "date": "2022-10-18T02:00:42.099000+00:00",
+  "comment": ""
+}
+```
 
 ### wca results downloader/extractor
 
