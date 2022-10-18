@@ -59,7 +59,7 @@ $ scramble_history parse twistytimer Backup_2022-10-17_20-19.txt | jq '.[0]'
   "time": "19.86",
   "penalty": "0",
   "dnf": false,
-  "date": "2022-10-18T02:00:42.099000+00:00",
+  "when": "2022-10-18T02:00:42.099000+00:00",
   "comment": ""
 }
 ```

@@ -12,7 +12,7 @@ class Solve(NamedTuple):
     time: Decimal
     penalty: Decimal
     dnf: bool
-    date: datetime
+    when: datetime
     comment: str
 
 
@@ -33,6 +33,6 @@ def parse_file(path: Path) -> Iterator[Solve]:
                 time=Decimal(time) / 1000,
                 dnf=is_dnf,
                 penalty=Decimal(upenalty),
-                date=datetime.fromtimestamp(int(date) / 1000, tz=timezone.utc),
+                when=datetime.fromtimestamp(int(date) / 1000, tz=timezone.utc),
                 comment=comment,
             )
