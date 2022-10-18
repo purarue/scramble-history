@@ -1,7 +1,5 @@
 # scramble-history
 
-To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
-
 parses scramble history from cstimer.net, cubers.io, twistytimer and the WCA TSV export
 
 ## Installation
@@ -46,7 +44,7 @@ $ scramble_history parse cstimer -j cstimer.json | jq '.[] | select(.raw_scrambl
 2022-10-11T03:31:30+00:00 21.107 B' U2 R2 F2 R2 B2 U' B2 F2 D2 L D' F R2 B' D' F R' U2
 ```
 
-To save my cstimer data continously in the background, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
+To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
 
 ## twistytimer | cubers.io
 
