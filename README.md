@@ -1,6 +1,6 @@
 # scramble-history
 
-parses scramble history from cstimer.net, cubers.io, twistytimer and the WCA TSV export
+parses your rubiks cube scramble history from [cstimer.net](https://cstimer.net/), [cubers.io](https://www.cubers.io/), [twistytimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US) and the [WCA TSV export](https://www.worldcubeassociation.org/results/misc/export.html)
 
 ## Installation
 
