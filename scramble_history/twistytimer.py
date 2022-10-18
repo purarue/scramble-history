@@ -5,7 +5,7 @@ from typing import NamedTuple, Iterator
 from datetime import datetime, timezone
 
 
-class Result(NamedTuple):
+class Solve(NamedTuple):
     puzzle: str
     category: str
     scramble: str
@@ -16,7 +16,7 @@ class Result(NamedTuple):
     comment: str
 
 
-def parse_file(path: Path) -> Iterator[Result]:
+def parse_file(path: Path) -> Iterator[Solve]:
     with path.open("r", newline="") as f:
         reader = csv.reader(f, delimiter=";")
         next(reader)
@@ -26,7 +26,7 @@ def parse_file(path: Path) -> Iterator[Result]:
             is_dnf = penalty == "2"
             if penalty == "1":
                 upenalty = 2
-            yield Result(
+            yield Solve(
                 puzzle=puzzle,
                 category=category,
                 scramble=scramble,
