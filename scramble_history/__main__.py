@@ -28,6 +28,9 @@ def _serialize(data: Any) -> str:
 
 @click.group()
 def main() -> None:
+    """
+    parses your rubiks cube scramble history
+    """
     pass
 
 
@@ -110,6 +113,11 @@ def cstimer(_json: bool, cstimer_file: Path) -> None:
     type=click.Path(exists=True, path_type=Path),
 )
 def twistytimer(twistytimer_file: Path) -> None:
+    """
+    Expects the twistytimer export file as input
+
+    This works for both the cubers.io and twistytimer export
+    """
     from .twistytimer import parse_file
 
     data = list(parse_file(twistytimer_file))
