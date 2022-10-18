@@ -2,7 +2,20 @@ import shutil
 import tempfile
 import zipfile
 import csv
-from typing import Dict, Optional, List, cast
+from typing import (
+    Dict,
+    Optional,
+    List,
+    cast,
+    Iterator,
+    Set,
+    Tuple,
+    NamedTuple,
+    TypeVar,
+    Type,
+)
+from dataclasses import dataclass
+from collections import defaultdict
 from pathlib import Path
 from functools import lru_cache
 
@@ -32,7 +45,7 @@ class ExportDownloader:
         req = requests.get(self.export_data_url)
         req.raise_for_status()
         data = req.json()
-        assert isinstance(dict, data)
+        assert isinstance(data, dict)
         return cast(Dict[str, str], data)
 
     @property
@@ -92,24 +105,163 @@ class ExportDownloader:
 TSV = List[str]
 
 
-def _extract_records(wca_user_id: str, results_file: str) -> List[TSV]:
-    results: List[List[str]] = []
+def _extract_records(wca_user_id: str, results_file: str) -> Iterator[TSV]:
     with open(results_file, "r", newline="") as f:
         reader = csv.reader(f, delimiter="\t")
+        next(reader)
         for line in reader:
             if line[7] == wca_user_id:
-                results.append(line)
-    return results
+                yield line
 
 
-# WIP
-def parse_user_details(wca_user_id: str) -> None:
+T = TypeVar("T")
+
+
+# splat a TSV row onto a namedtuple, handling extra fields if missing
+def row_to_type(data: List[str], nt: Type[T]) -> T:
+    assert hasattr(nt, "_fields")
+    fields: Tuple[str] = cast(Tuple[str], getattr(nt, "_fields"))
+    assert isinstance(fields, tuple)
+    while len(data) < len(fields):
+        data.append("")
+    assert len(data) == len(
+        fields
+    ), f"{data} has too many fields, tried to construct {nt.__name__} {fields}"
+    return nt(*data)
+
+
+class WCA_Result(NamedTuple):
+    competitionId: str
+    eventId: str
+    roundTypeId: str
+    pos: str
+    best: str
+    average: str
+    personName: str
+    personId: str
+    personCountryId: str
+    formatId: str
+    value1: str
+    value2: str
+    value3: str
+    value4: str
+    value5: str
+    regionalSingleRecord: str
+    regionalAverageRecord: str
+
+    @classmethod
+    def parse(cls, data: List[str]) -> "WCA_Result":
+        return row_to_type(data, cls)
+
+
+class WCA_Scramble(NamedTuple):
+    scrambleId: str
+    competitionId: str
+    eventId: str
+    roundTypeId: str
+    groupId: str
+    isExtra: str
+    scrambleNum: str
+    scramble: str
+
+    @classmethod
+    def parse(cls, data: List[str]) -> "WCA_Scramble":
+        return row_to_type(data, cls)
+
+
+def _extract_scrambles_for_competitions(
+    competitions_file: str, competitions: Set[str]
+) -> Iterator[TSV]:
+    with open(competitions_file, "r", newline="") as f:
+        reader = csv.reader(f, delimiter="\t")
+        next(reader)
+        for line in reader:
+            if line[1] in competitions:
+                yield line
+
+
+def _match_records_and_scrambles(
+    records: List[WCA_Result], scrambles: List[WCA_Scramble]
+) -> Iterator[Tuple[WCA_Result, List[WCA_Scramble]]]:
+    results_scramble_map: Dict[WCA_Result, List[WCA_Scramble]] = defaultdict(list)
+    for record in records:
+        for scramble in scrambles:
+            if (
+                record.competitionId == scramble.competitionId
+                and record.eventId == scramble.eventId
+                and record.roundTypeId == scramble.roundTypeId
+            ):
+                results_scramble_map[record].append(scramble)
+        if len(results_scramble_map) == 0:
+            logger.warning(f"Could not find any scrambles for {record}")
+    yield from results_scramble_map.items()
+
+
+class WCA_Competition(NamedTuple):
+    id: str
+    name: str
+    cityName: str
+    countryId: str
+    information: str
+    year: str
+    month: str
+    day: str
+    endMonth: str
+    endDay: str
+    cancelled: str
+    eventSpecs: str
+    wcaDelegate: str
+    organiser: str
+    venue: str
+    venueAddress: str
+    venueDetails: str
+    external_website: str
+    cellName: str
+    latitude: str
+    longitude: str
+
+    @classmethod
+    def parse(cls, data: List[str]) -> "WCA_Competition":
+        return row_to_type(data, cls)
+
+
+def _competition_data(competition_file: str, competitions: Set[str]) -> Iterator[TSV]:
+    with open(competition_file, "r", newline="") as f:
+        reader = csv.reader(f, delimiter="\t")
+        for line in reader:
+            if line[0] in competitions:
+                yield line
+
+
+@dataclass
+class Details:
+    competition_data: List[WCA_Competition]
+    results_w_scrambles: List[Tuple[WCA_Result, List[WCA_Scramble]]]
+
+
+def parse_return_all_details(wca_user_id: str) -> Details:
     exp = ExportDownloader()
     src = exp.cache_tsv_dir
-    _extract_records(wca_user_id, str(src / "WCA_export_Results.tsv"))
-    # see 'value' rows here for what these mean
-    # https://www.worldcubeassociation.org/results/misc/export.html
-    #
-    # need to extract dates/location info from export_Competitions
-    # and Scrambles from WCA_export_Scrambles by matching the records
-    breakpoint()
+    records = [
+        WCA_Result.parse(row)
+        for row in _extract_records(wca_user_id, str(src / "WCA_export_Results.tsv"))
+    ]
+    # all competitions user has been to
+    competitions = {r.competitionId for r in records}
+    # all scrambles from any competition user has been to
+    comp_scrambles = [
+        WCA_Scramble.parse(scr)
+        for scr in _extract_scrambles_for_competitions(
+            str(src / "WCA_export_Scrambles.tsv"), competitions
+        )
+    ]
+    # match records/scrambles
+    results_w_scrambles = list(_match_records_and_scrambles(records, comp_scrambles))
+    comp_data = [
+        WCA_Competition.parse(c)
+        for c in _competition_data(
+            str(src / "WCA_export_Competitions.tsv"), competitions
+        )
+    ]
+
+    return Details(competition_data=comp_data, results_w_scrambles=results_w_scrambles)

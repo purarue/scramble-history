@@ -25,11 +25,12 @@ setup(
         "console_scripts": ["scramble_history = scramble_history.__main__:main"]
     },
     extras_require={
+        "optional": ["orjson"],
         "testing": [
             "pytest",
             "mypy",
             "flake8",
-        ]
+        ],
     },
     classifiers=[
         "License :: OSI Approved :: MIT License",

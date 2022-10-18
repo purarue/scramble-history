@@ -1,6 +1,29 @@
 from pathlib import Path
+from typing import Any
+from decimal import Decimal
 
 import click
+
+
+def _default(o: Any) -> Any:
+    # orjson doesn't serialize namedtuples to avoid serializing
+    # them as tuples (arrays), since they're technically a subclass
+    if isinstance(o, Decimal):
+        return str(o)
+    if hasattr(o, "_asdict"):
+        return o._asdict()
+    raise TypeError(f"Could not serialize object of type {type(o).__name__}")
+
+
+def _serialize(data: Any) -> str:
+    import orjson  # type: ignore[import]
+
+    bdata: bytes = orjson.dumps(
+        data,
+        option=orjson.OPT_NON_STR_KEYS,
+        default=_default,
+    )
+    return bdata.decode("utf-8")
 
 
 @click.group()
@@ -41,9 +64,10 @@ def extract(wca_user_id: str) -> None:
     """
     Extract details from the local TSV data (must call update first)
     """
-    from .wca_export import parse_user_details
+    from .wca_export import parse_return_all_details
 
-    parse_user_details(wca_user_id)
+    details = parse_return_all_details(wca_user_id)
+    click.echo(_serialize(details))
 
 
 @main.group()
@@ -55,23 +79,28 @@ def parse() -> None:
 
 
 @parse.command()
+@click.option(
+    "-j", "--json", "_json", is_flag=True, default=False, help="print data as JSON"
+)
 @click.argument(
     "CSTIMER_FILE",
     required=True,
     type=click.Path(exists=True, path_type=Path),
 )
-def cstimer(cstimer_file: Path) -> None:
+def cstimer(_json: bool, cstimer_file: Path) -> None:
     """
     Expects the cstimer.net export file as input
     """
     from .cstimer import parse_file
-    import IPython  # type: ignore[import]
 
-    sess = list(parse_file(cstimer_file))  # noqa: F841
+    sess = parse_file(cstimer_file)
+    if _json:
+        click.echo(_serialize(sess))
+    else:
+        import IPython  # type: ignore[import]
 
-    header = f"Use {click.style('sess', fg='green')} to review session data"
-
-    IPython.embed(header=header)
+        header = f"Use {click.style('sess', fg='green')} to review session data"
+        IPython.embed(header=header)
 
 
 if __name__ == "__main__":
