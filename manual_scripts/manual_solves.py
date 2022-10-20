@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from datetime import datetime
 
 import click
@@ -13,7 +13,7 @@ class RawComment(NamedTuple):
     event: str
     scrambles: str
     when: datetime
-    method: str | None
+    method: Optional[str]
     comment: str
 
     @staticmethod

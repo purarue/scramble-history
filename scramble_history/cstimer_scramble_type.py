@@ -1,11 +1,11 @@
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from functools import lru_cache
 
 
 class CSTimerScramble(NamedTuple):
     scramble_code: str
-    category: str | None
-    name: str | None
+    category: Optional[str]
+    name: Optional[str]
 
 
 # instead of dict/mapping just save all possible data
