@@ -23,3 +23,6 @@ def test_basic():
     assert int(dnfs[0].penalty) == 0
     assert len(penaltys) == 2
     assert int(penaltys[0].penalty) == 2
+
+    assert data[0].scramble_type is not None
+    assert data[0].scramble_type.name == "3x3x3"

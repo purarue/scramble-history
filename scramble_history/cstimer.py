@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .log import logger
+from .cstimer_scramble_type import CSTimerScramble, parse_scramble_type
 
 
 class Solve(NamedTuple):
@@ -21,11 +22,8 @@ class Session(NamedTuple):
     number: int
     name: str
     raw_scramble_type: str
+    scramble_type: Optional[CSTimerScramble]
     solves: List[Solve]
-
-    @property
-    def scramble_type(self) -> Optional[str]:
-        pass
 
 
 def parse_file(path: Path) -> List[Session]:
@@ -63,11 +61,18 @@ def _parse_blob(f: TextIO) -> List[Session]:
         raw_scrambles = data[data_key]
         scrambles = map(_parse_scramble, raw_scrambles)
 
+        scramble_type: Optional[CSTimerScramble] = None
+        try:
+            scramble_type = parse_scramble_type(scramble_code)
+        except KeyError:
+            pass
+
         sessions.append(
             Session(
                 number=int(session_number),
                 name=session_name,
                 raw_scramble_type=scramble_code,
+                scramble_type=scramble_type,
                 solves=[s for s in scrambles if s is not None],
             )
         )
