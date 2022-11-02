@@ -51,7 +51,7 @@ To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server
 Parses the export for the [TwistyTimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US) android app, which [cubers.io](https://www.cubers.io/) also exports to:
 
 ```
-$ scramble_history parse twistytimer Backup_2022-10-17_20-19.txt | jq '.[0]'
+$ scramble_history parse twistytimer --json Backup_2022-10-17_20-19.txt | jq '.[0]'
 {
   "puzzle": "333",
   "category": "Normal",
@@ -77,7 +77,7 @@ $ scramble_history export wca update
 $ python3 -m scramble_history export wca extract -u 2017BREC02
 ...
 
-$ scramble_history export wca extract -u 2017BREC02 | jq '.results_w_scrambles | .[] | .[0] | "\(.competitionId) \(.eventId) \(.value1) \(.value2) \(.value3) \(.value4) \(.value5)"' -r
+$ scramble_history export wca extract -u 2017BREC02 --json | jq '.results_w_scrambles | .[] | .[0] | "\(.competitionId) \(.eventId) \(.value1) \(.value2) \(.value3) \(.value4) \(.value5)"' -r
 BerkeleySummer2017 skewb 2009 2326 0 0 0
 BerkeleySummer2017 333fm -1 0 0 0 0
 BerkeleySummer2017 333 3983 2737 2531 2379 2562

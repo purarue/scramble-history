@@ -26,6 +26,11 @@ def _serialize(data: Any) -> str:
     return bdata.decode("utf-8")
 
 
+JSON = click.option(
+    "-j", "--json", "_json", is_flag=True, default=False, help="print data as JSON"
+)
+
+
 @click.group()
 def main() -> None:
     """
@@ -63,14 +68,21 @@ def update() -> None:
 @click.option(
     "-u", "--wca-user-id", type=str, help="WCA ID to extract results for", required=True
 )
-def extract(wca_user_id: str) -> None:
+@JSON
+def extract(_json: bool, wca_user_id: str) -> None:
     """
     Extract details from the local TSV data (must call update first)
     """
     from .wca_export import parse_return_all_details
 
     details = parse_return_all_details(wca_user_id)
-    click.echo(_serialize(details))
+    if _json:
+        click.echo(_serialize(details))
+    else:
+        import IPython  # type: ignore[import]
+
+        header = f"Use {click.style('details', fg='green')} to review TSV data"
+        IPython.embed(header=header)
 
 
 @main.group()
@@ -82,9 +94,7 @@ def parse() -> None:
 
 
 @parse.command(short_help="parse cstimer.net export file")
-@click.option(
-    "-j", "--json", "_json", is_flag=True, default=False, help="print data as JSON"
-)
+@JSON
 @click.argument(
     "CSTIMER_FILE",
     required=True,
@@ -112,7 +122,8 @@ def cstimer(_json: bool, cstimer_file: Path) -> None:
     required=True,
     type=click.Path(exists=True, path_type=Path),
 )
-def twistytimer(twistytimer_file: Path) -> None:
+@JSON
+def twistytimer(_json: bool, twistytimer_file: Path) -> None:
     """
     Expects the twistytimer export file as input
 
@@ -120,8 +131,14 @@ def twistytimer(twistytimer_file: Path) -> None:
     """
     from .twistytimer import parse_file
 
-    data = list(parse_file(twistytimer_file))
-    click.echo(_serialize(data))
+    solves = list(parse_file(twistytimer_file))
+    if _json:
+        click.echo(_serialize(solves))
+    else:
+        import IPython  # type: ignore[import]
+
+        header = f"Use {click.style('solves', fg='green')} to review your solves"
+        IPython.embed(header=header)
 
 
 if __name__ == "__main__":
