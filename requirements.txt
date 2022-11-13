@@ -3,3 +3,4 @@ requests
 logzero
 IPython
 platformdirs
+pytimeparse
