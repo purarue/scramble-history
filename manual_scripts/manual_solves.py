@@ -59,17 +59,17 @@ def main(cmd: str) -> None:
             ), f"solves didnt match scramble length {scram} {solves}"
             if m.is_group:
                 assert len(solves) > 1, f"for group {m}, solve length <= 1"
-            for scr, sl in zip(scram, solves, strict=True):
+            for _scr, _sl in zip(scram, solves):
                 # the scramble/category probably has to be fixed
                 # a bit here, but that can be done with a merge
                 # at a higher level/cleaned up manually
                 parsed.append(
                     Solve(
-                        scramble=scr,
+                        scramble=_scr,
                         puzzle=m.event,
                         category=m.method or "",
-                        dnf=sl == "DNF",
-                        time=Decimal("0") if isinstance(sl, str) else sl,
+                        dnf=_sl == "DNF",
+                        time=Decimal("0") if isinstance(_sl, str) else _sl,
                         penalty=Decimal("0"),
                         when=datetime.fromtimestamp(m.when.timestamp()),
                         comment=m.comment.strip() if m.comment is not None else "",
