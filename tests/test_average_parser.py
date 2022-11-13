@@ -11,7 +11,8 @@ from scramble_history.average_parser import parse_average
 
 def test_run_all() -> None:
     for avg in json.loads(average_data.read_text()):
-        solves = len(parse_average(avg))
+        solves = parse_average(avg)
+        assert len(solves) >= 1
 
 
 def test_compare() -> None:
