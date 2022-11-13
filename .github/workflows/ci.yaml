@@ -25,7 +25,8 @@ jobs:
           pip install '.[testing]'
       - name: Run mypy
         run: |
-          mypy --install-types --non-interactive ./scramble_history ./manual_scripts
+          mypy ./manual_scripts
+          mypy --install-types --non-interactive ./scramble_history
       - name: Run pytest
         run: |
           pytest
