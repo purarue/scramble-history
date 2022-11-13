@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 from collections import defaultdict
-from typing import Any, List, Dict, Sequence
+from typing import Any, List, Dict, Sequence, Mapping, Optional
 from decimal import Decimal
 
 import click
@@ -152,9 +152,9 @@ def _parse_merge_inputs(
 ) -> Dict[str, List[Path]]:
     if len(value) < 1:
         raise click.BadArgumentUsage("Must supply some datafiles as input")
-    parsed = defaultdict(list)
+    parsed: Mapping[str, List[Path]] = defaultdict(list)
     val = list(value)
-    parser = None
+    parser: Optional[str] = None
     for p in val:
         if parser is None or p.startswith("--"):
             if p not in KNOWN_PARSERS:
@@ -167,7 +167,7 @@ def _parse_merge_inputs(
             if not pp.exists():
                 raise click.BadArgumentUsage(f"Filepath '{pp}' does not exist")
             parsed[parser].append(pp)
-    return parsed
+    return dict(parsed)
 
 
 config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
@@ -213,6 +213,7 @@ def merge(
 
     solves: List[Solve] = []
 
+    slv: List[Any] = []
     for k, v in datafiles.items():
         assert isinstance(v, list)
         if k == "--cstimer":

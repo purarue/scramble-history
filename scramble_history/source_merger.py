@@ -71,7 +71,7 @@ class HasattrValidator(Validator):
         super().__init__()
         self.check_obj = check_obj
 
-    def validate(self, document: Document):
+    def validate(self, document: Document) -> None:
         text = document.text
 
         for key in text.strip().split():
