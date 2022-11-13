@@ -64,7 +64,36 @@ $ scramble_history parse twistytimer --json Backup_2022-10-17_20-19.txt | jq '.[
 }
 ```
 
+## merge
+
+The merge command lets you combine solves from different sources into a normalized schema. It does this by prompting you to define attributes from each solve to look for, and then converts any solve it finds with those values to the same description. For example:
+
+```json
+{
+  "source_class_name": "scramble_history.cstimer.Solve",
+  "source_fields_match": {
+    "name": "3x3",
+    "raw_scramble_type": "333"
+  },
+  "transformed_puzzle": "333",
+  "transformed_event_code": "WCA",
+  "transformed_event_description": "3x3 CFOP"
+}
+```
+
+Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history_sourcemap.json`. You can see mine [here](https://sean.fish/d/scramble_history_sourcemap.json?redirect)
+
+The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
+
+```bash
+python3 -m scramble_history merge -j \
+    --cstimer ~/data/cubing/cstimer/*.json \
+    --twistytimer ~/data/cubing/phone_twistytimer/* ~/data/cubing/cubers_io/* ~/data/cubing/manual.csv
+```
+
 ## wca results downloader/extractor
+
+This is a WIP -- it does allow you to download the export and extract your times, but not relate those directly to the scrambles from each group
 
 Downloads the TSV export from <https://www.worldcubeassociation.org/results/misc/export.html> and lets you extract records/scrambles from those rounds from the giant TSV files for your WCA user ID
 
