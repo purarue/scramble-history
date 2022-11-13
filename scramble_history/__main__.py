@@ -1,5 +1,6 @@
 import os
 import sys
+import itertools
 from pathlib import Path
 from collections import defaultdict
 from typing import Any, List, Dict, Sequence, Mapping, Optional
@@ -196,11 +197,22 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
     is_flag=True,
     default=False,
 )
+@click.option(
+    "-g",
+    "--group-by",
+    type=click.Choice(["puzzle", "event_code", "event_description"]),
+    help="Group parsed results by key",
+    default=None,
+)
 @click.argument(
     "DATAFILES", nargs=-1, type=click.UNPROCESSED, callback=_parse_merge_inputs
 )
 def merge(
-    sourcemap_file: Path, _json: bool, check: bool, datafiles: Dict[str, List[Path]]
+    sourcemap_file: Path,
+    _json: bool,
+    check: bool,
+    group_by: str,
+    datafiles: Dict[str, List[Path]],
 ) -> None:
     """
     merge different data sources together
@@ -236,12 +248,23 @@ def merge(
     if check:
         return
 
+    res: Any = solves
+    if group_by is not None:
+        assert hasattr(
+            solves[0], group_by
+        ), f"Error: could not find {group_by} on {solves[0]}"
+        solves.sort(key=lambda s: getattr(s, group_by))
+        res = {
+            k: list(g)
+            for k, g in itertools.groupby(solves, key=lambda s: getattr(s, group_by))
+        }
+
     if _json:
-        click.echo(_serialize(solves))
+        click.echo(_serialize(res))
     else:
         import IPython  # type: ignore[import]
 
-        header = f"Use {click.style('solves', fg='green')} to review merged solves"
+        header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
 
 

@@ -91,6 +91,25 @@ python3 -m scramble_history merge -j \
     --twistytimer ~/data/cubing/phone_twistytimer/* ~/data/cubing/cubers_io/* ~/data/cubing/manual.csv
 ```
 
+Examples:
+
+```bash
+$ python3 -m scramble_history merge -g event_description -j --cstimer .. --twistytimer .. \
+ | jq 'to_entries[] | "\(.value | length) \(.key)"' -r | sort -nr
+
+834 3x3 CFOP
+295 2x2
+112 3x3 CFOP OH
+99 3x3 2-GEN <RU>
+95 3x3 LSE
+65 4x4
+37 3x3 Roux
+35 Skewb
+25 Pyraminx
+20 3x3 F2L
+5 3x3 Roux OH
+```
+
 ## wca results downloader/extractor
 
 This is a WIP -- it does allow you to download the export and extract your times, but not relate those directly to the scrambles from each group
