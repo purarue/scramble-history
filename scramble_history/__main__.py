@@ -253,10 +253,10 @@ def merge(
         assert hasattr(
             solves[0], group_by
         ), f"Error: could not find {group_by} on {solves[0]}"
-        solves.sort(key=lambda s: getattr(s, group_by))
+        solves.sort(key=lambda s: getattr(s, group_by))  # type: ignore[no-any-return]
         res = {
             k: list(g)
-            for k, g in itertools.groupby(solves, key=lambda s: getattr(s, group_by))
+            for k, g in itertools.groupby(solves, key=lambda s: getattr(s, group_by))  # type: ignore[no-any-return]
         }
 
     if _json:
