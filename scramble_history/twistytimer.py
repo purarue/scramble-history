@@ -2,9 +2,14 @@ import sys
 import csv
 import io
 from pathlib import Path
+from itertools import chain
 from decimal import Decimal
-from typing import NamedTuple, Iterator, List
+from typing import NamedTuple, Iterator, List, Dict, Any
 from datetime import datetime, timezone
+
+from more_itertools import unique_everseen
+
+from .state import State
 
 
 class Solve(NamedTuple):
@@ -32,6 +37,23 @@ class Solve(NamedTuple):
             str(penalty_code),
             self.comment,
         ]
+
+    @property
+    def _prompt_defaults(self) -> Dict[str, Any]:
+        return {
+            "transformed_puzzle": self.puzzle,
+            "transformed_event_description": self.category,
+        }
+
+    def _transform_map(self) -> Dict[str, Any]:
+        return dict(
+            state=State.DNF if self.dnf else State.SOLVED,
+            scramble=self.scramble,
+            comment=self.comment,
+            time=self.time,
+            penalty=self.penalty,
+            when=self.when,
+        )
 
 
 HEADER: str = "Puzzle,Category,Time(millis),Date(millis),Scramble,Penalty,Comment"
@@ -74,3 +96,7 @@ def parse_file(path: Path) -> Iterator[Solve]:
                 when=datetime.fromtimestamp(int(date) / 1000, tz=timezone.utc),
                 comment=comment,
             )
+
+
+def parse_files(paths: List[Path]) -> Iterator[Solve]:
+    yield from unique_everseen(chain(*(parse_file(p) for p in paths)))

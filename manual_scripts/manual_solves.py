@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from typing import NamedTuple, Optional, List
+from typing import NamedTuple, Optional, List, Dict, Any
 from decimal import Decimal
 from datetime import datetime
 
@@ -22,7 +22,7 @@ class RawComment(NamedTuple):
     comment: Optional[str]
 
     @staticmethod
-    def attr_use_values() -> dict:
+    def attr_use_values() -> Dict[str, Any]:
         return {
             "scrambles": lambda: edit_in_vim("scramble"),
             "times": lambda: edit_in_vim("times"),
@@ -40,7 +40,7 @@ manual_solves_file = os.path.join(this_dir, "./manual_solves.json")
 
 @click.command()
 @click.argument("CMD", type=click.Choice(["loop", "parse"]))
-def main(cmd: str):
+def main(cmd: str) -> None:
     """
     loop - repeatedly prompts to input data
     parse - parses those into the twistytimer csv export

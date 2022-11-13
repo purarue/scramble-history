@@ -1,15 +1,19 @@
 import sys
 import json
 from decimal import Decimal
-from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple
+from itertools import chain
+from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
+from more_itertools import unique_everseen
+
 from .log import logger
 from .cstimer_scramble_type import CSTimerScramble, parse_scramble_type
+from .state import State
 
 
-class Solve(NamedTuple):
+class SessionSolve(NamedTuple):
     scramble: str
     comment: str
     solve_time: Decimal
@@ -23,12 +27,62 @@ class Session(NamedTuple):
     name: str
     raw_scramble_type: str
     scramble_type: Optional[CSTimerScramble]
-    solves: List[Solve]
+    solves: List[SessionSolve]
+
+
+class Solve(NamedTuple):
+    number: int
+    name: str
+    raw_scramble_type: str
+    scramble_type: Optional[CSTimerScramble]
+
+    scramble: str
+    comment: str
+    solve_time: Decimal
+    penalty: Decimal
+    dnf: bool
+    when: datetime
+
+    @property
+    def _prompt_defaults(self) -> Dict[str, Any]:
+        return {
+            "transformed_puzzle": self.raw_scramble_type,
+            "transformed_event_description": self.scramble_type.name
+            if self.scramble_type is not None
+            else None,
+        }
+
+    def _transform_map(self) -> Dict[str, Any]:
+        return dict(
+            state=State.DNF if self.dnf else State.SOLVED,
+            scramble=self.scramble,
+            comment=self.comment,
+            time=self.solve_time,
+            penalty=self.penalty,
+            when=self.when,
+        )
 
 
 def parse_file(path: Path) -> List[Session]:
     with path.open("r") as f:
         return _parse_blob(f)
+
+
+def denormalize(sessions: List[Session]) -> Iterator[Solve]:
+    for sess in sessions:
+        for solve in sess.solves:
+            yield Solve(
+                number=sess.number,
+                name=sess.name,
+                raw_scramble_type=sess.raw_scramble_type,
+                scramble_type=sess.scramble_type,
+                scramble=solve.scramble,
+                comment=solve.comment,
+                solve_time=solve.solve_time,
+                penalty=solve.penalty,
+                dnf=solve.dnf,
+                when=solve.when,
+            )
 
 
 def _parse_blob(f: TextIO) -> List[Session]:
@@ -83,7 +137,7 @@ def _parse_blob(f: TextIO) -> List[Session]:
 RawScramble = Tuple[Tuple[int, int], str, str, int]
 
 
-def _parse_scramble(raw: RawScramble) -> Optional[Solve]:
+def _parse_scramble(raw: RawScramble) -> Optional[SessionSolve]:
     try:
         [[penalty, solve_time], scramble, comment, timestamp] = raw
         is_dnf = penalty == -1
@@ -92,7 +146,7 @@ def _parse_scramble(raw: RawScramble) -> Optional[Solve]:
         if is_dnf:
             penalty = 0
 
-        return Solve(
+        return SessionSolve(
             scramble=scramble.strip(),
             comment=comment,
             solve_time=Decimal(solve_time) / 1000,
@@ -103,3 +157,7 @@ def _parse_scramble(raw: RawScramble) -> Optional[Solve]:
     except ValueError as e:
         print(f"Could not parse raw scramble info for {raw}: {e}", file=sys.stderr)
         return None
+
+
+def parse_files(paths: List[Path]) -> Iterator[Solve]:
+    yield from unique_everseen(chain(*(denormalize(parse_file(p)) for p in paths)))

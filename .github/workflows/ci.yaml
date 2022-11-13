@@ -25,10 +25,10 @@ jobs:
           pip install '.[testing]'
       - name: Run mypy
         run: |
-          mypy --install-types --non-interactive ./scramble_history
+          mypy --install-types --non-interactive ./scramble_history ./manual_scripts
       - name: Run pytest
         run: |
           pytest
       - name: Run flake8
         run: |
-          flake8 ./scramble_history
+          flake8 ./scramble_history ./manual_scripts

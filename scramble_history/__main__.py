@@ -1,5 +1,8 @@
+import os
+import sys
 from pathlib import Path
-from typing import Any
+from collections import defaultdict
+from typing import Any, List, Dict, Sequence
 from decimal import Decimal
 
 import click
@@ -31,7 +34,7 @@ JSON = click.option(
 )
 
 
-@click.group()
+@click.group(context_settings={"max_content_width": 110})
 def main() -> None:
     """
     parses your rubiks cube scramble history
@@ -138,6 +141,106 @@ def twistytimer(_json: bool, twistytimer_file: Path) -> None:
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('solves', fg='green')} to review your solves"
+        IPython.embed(header=header)
+
+
+KNOWN_PARSERS = {"--cstimer", "--twistytimer"}
+
+
+def _parse_merge_inputs(
+    ctx: click.Context, param: click.Argument, value: Sequence[str]
+) -> Dict[str, List[Path]]:
+    if len(value) < 1:
+        raise click.BadArgumentUsage("Must supply some datafiles as input")
+    parsed = defaultdict(list)
+    val = list(value)
+    parser = None
+    for p in val:
+        if parser is None or p.startswith("--"):
+            if p not in KNOWN_PARSERS:
+                raise click.BadArgumentUsage(
+                    f"Unknown option filetype {p}, should be one of {KNOWN_PARSERS}"
+                )
+            parser = p
+        else:
+            pp = Path(p)
+            if not pp.exists():
+                raise click.BadArgumentUsage(f"Filepath '{pp}' does not exist")
+            parsed[parser].append(pp)
+    return parsed
+
+
+config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
+
+
+@main.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+        max_content_width=110,
+    )
+)
+@click.option(
+    "-s",
+    "--sourcemap-file",
+    help="Configuration/data file which saves choices on how to map solves from different sources",
+    default=config_dir / "scramble_history_sourcemap.json",
+    show_default=True,
+    type=click.Path(dir_okay=False, path_type=Path),
+)
+@JSON
+@click.option(
+    "-c",
+    "--check",
+    help="Dont print/interact, just check that all solves are transformed properly",
+    is_flag=True,
+    default=False,
+)
+@click.argument(
+    "DATAFILES", nargs=-1, type=click.UNPROCESSED, callback=_parse_merge_inputs
+)
+def merge(
+    sourcemap_file: Path, _json: bool, check: bool, datafiles: Dict[str, List[Path]]
+) -> None:
+    """
+    merge different data sources together
+    """
+    from .source_merger import SourceMerger, Solve
+    from .cstimer import parse_files as cstimer_merge
+    from .twistytimer import parse_files as twistytimer_merge
+
+    merger = SourceMerger(sourcemap_file)
+
+    solves: List[Solve] = []
+
+    for k, v in datafiles.items():
+        assert isinstance(v, list)
+        if k == "--cstimer":
+            slv = list(cstimer_merge(v))
+        elif k == "--twistytimer":
+            slv = list(twistytimer_merge(v))
+        else:
+            raise RuntimeError(f"Unknown scramble type {k}")
+
+        if len(slv) == 0:
+            click.echo(
+                f"Did not parse any solves from {k} {v}, double check to make sure inputs are correct",
+                err=True,
+            )
+            sys.exit(1)
+
+        for s in slv:
+            solves.append(merger.transform(s))
+
+    if check:
+        return
+
+    if _json:
+        click.echo(_serialize(solves))
+    else:
+        import IPython  # type: ignore[import]
+
+        header = f"Use {click.style('solves', fg='green')} to review merged solves"
         IPython.embed(header=header)
 
 
