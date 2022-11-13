@@ -256,6 +256,7 @@ def parse_return_all_details(wca_user_id: str) -> Details:
         )
     ]
     # match records/scrambles
+    # TODO: need to find the group that user was in to match to their scrambles?
     results_w_scrambles = list(_match_records_and_scrambles(records, comp_scrambles))
     comp_data = [
         WCA_Competition.parse(c)
