@@ -29,7 +29,7 @@ class RawComment(NamedTuple):
         }
 
 
-def edit_in_vim(text: Optional[str]) -> Optional[str]
+def edit_in_vim(text: Optional[str]) -> Optional[str]:
     m = click.edit(text=text, editor="nvim")
     return m if m is None else m.strip()
 
