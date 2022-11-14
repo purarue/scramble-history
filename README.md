@@ -31,17 +31,15 @@ Out[2]: Solve(scramble="D U2 F2 U' F2 R2 D B2 U' L2 F2 U2 B R U F' L U2 L2 F U'"
 Or to dump to JSON:
 
 ```
-$ scramble_history parse cstimer -j cstimer.json | jq '.[] | select(.raw_scramble_type == "333") | .solves | .[] | "\(.when) \(.solve_time) \(.scramble)"' -r | head
-2022-10-11T03:24:27+00:00 25.969 F U' F2 U R2 D L2 F2 U B2 D' L2 D2 R F' U R2 D L2 F' L
-2022-10-11T03:25:16+00:00 22.22 R' U' F2 D2 U' F2 L2 U2 F2 U' L B' R' D2 F L' D F L
-2022-10-11T03:26:01+00:00 16.05 D' B' L F U2 F2 U' R2 B U2 D L2 D B2 U' L2 U' F2 L2
-2022-10-11T03:26:43+00:00 22.697 F B U F2 R' L2 U2 B U D2 B' L2 B' D2 R2 B2 U2 D2 B L2 B
-2022-10-11T03:27:27+00:00 21.193 R2 F B2 L2 U2 R2 D B2 L2 D B2 D' R2 U2 R F' L' B' D2 L2 D'
-2022-10-11T03:28:07+00:00 16.21 L' D U2 B D2 R2 B D2 U2 B F2 L2 F' D' L' D L D R2 U'
-2022-10-11T03:28:45+00:00 16.338 L' U' R D2 U2 F2 L' F2 L2 F2 D2 R2 F2 R' F' D' L2 B' D F' L'
-2022-10-11T03:30:11+00:00 17.824 B' R F2 U' L' F2 R2 L' B' F2 R2 F2 U L2 U' D2 F2 D2 R2
-2022-10-11T03:30:49+00:00 19.697 B2 D' L U2 B' L2 B' L2 F U2 B R B D' F2 R2 D R
-2022-10-11T03:31:30+00:00 21.107 B' U2 R2 F2 R2 B2 U' B2 F2 D2 L D' F R2 B' D' F R' U2
+$ scramble_history parse cstimer -j ~/data/cubing/cstimer/1665942943939.json | jq '.[].solves | .[0]'
+{
+  "scramble": "F U' F2 U R2 D L2 F2 U B2 D' L2 D2 R F' U R2 D L2 F' L",
+  "comment": "",
+  "solve_time": "25.969",
+  "penalty": "0",
+  "dnf": false,
+  "when": "2022-10-11T03:24:27+00:00"
+}
 ```
 
 To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
@@ -81,7 +79,7 @@ The merge command lets you combine solves from different sources into a normaliz
 }
 ```
 
-Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history_sourcemap.json`. You can see mine [here](https://sean.fish/d/scramble_history_sourcemap.json?redirect)
+Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history_sourcemap.json`. As an example of the generated file, you can see mine [here](https://sean.fish/d/scramble_history_sourcemap.json?redirect)
 
 The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
 
@@ -108,6 +106,44 @@ $ python3 -m scramble_history merge -g event_description -j --cstimer .. --twist
 25 Pyraminx
 20 3x3 F2L
 5 3x3 Roux OH
+```
+
+It can also calculate running averages across your merged data:
+
+```
+$ python3 -m scramble_history merge ... -a stats
+==============
+2x2
+==============
+Most recent Ao5 => 6.437 = 5.680 7.220 (DNF) 6.410 (5.480)
+Ao5: 6.437
+Ao12: 8.215
+Ao50: 7.381
+Ao100: 7.582
+==============
+3x3 CFOP
+==============
+Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
+Ao5: 19.847
+Ao12: 19.115
+Ao50: 18.603
+Ao100: DNF
+==============
+3x3 CFOP OH
+==============
+Most recent Ao5 => 29.327 = 29.800 (34.950) 27.750 (26.710) 30.430
+Ao5: 29.327
+Ao12: 29.879
+Ao50: 32.892
+Ao100: 33.766
+==============
+4x4
+==============
+Most recent Ao5 => 2:41.123 = 2:53.280 (3:31.680) (2:14.690) 2:50.200 2:19.890
+Ao5: 2:41.123
+Ao12: 2:38.749
+Ao50: 2:47.116
+Ao100: --
 ```
 
 ## wca results downloader/extractor

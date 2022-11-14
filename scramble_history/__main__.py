@@ -189,7 +189,14 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
     show_default=True,
     type=click.Path(dir_okay=False, path_type=Path),
 )
-@JSON
+@click.option(
+    "-a",
+    "--action",
+    type=click.Choice(["json", "repl", "stats"]),
+    help="what to do with merged solves",
+    default="repl",
+    show_default=True,
+)
 @click.option(
     "-c",
     "--check",
@@ -209,9 +216,9 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
 )
 def merge(
     sourcemap_file: Path,
-    _json: bool,
+    action: str,
     check: bool,
-    group_by: str,
+    group_by: Optional[str],
     datafiles: Dict[str, List[Path]],
 ) -> None:
     """
@@ -225,47 +232,68 @@ def merge(
 
     solves: List[Solve] = []
 
-    slv: List[Any] = []
-    for k, v in datafiles.items():
-        assert isinstance(v, list)
-        if k == "--cstimer":
-            slv = list(cstimer_merge(v))
-        elif k == "--twistytimer":
-            slv = list(twistytimer_merge(v))
-        else:
-            raise RuntimeError(f"Unknown scramble type {k}")
-
+    for flag, grouped_files in datafiles.items():
+        assert flag in KNOWN_PARSERS
+        mergefunc = cstimer_merge if flag == "--cstimer" else twistytimer_merge
+        slv = list(mergefunc(grouped_files))
         if len(slv) == 0:
             click.echo(
-                f"Did not parse any solves from {k} {v}, double check to make sure inputs are correct",
+                f"Did not parse any solves from {flag} {grouped_files}, double check to make sure inputs are correct",
                 err=True,
             )
             sys.exit(1)
-
-        for s in slv:
-            solves.append(merger.transform(s))
+        solves.extend(map(merger.transform, slv))
 
     if check:
         return
 
     res: Any = solves
-    if group_by is not None:
+    if group_by is not None or action == "stats":
+        if group_by is None:
+            click.echo(
+                "Passed 'stats' with no '--group_by', grouping by 'event_description'",
+                err=True,
+            )
+            group_by = "event_description"
+        key = str(group_by)
         assert hasattr(
-            solves[0], group_by
-        ), f"Error: could not find {group_by} on {solves[0]}"
-        solves.sort(key=lambda s: getattr(s, group_by))  # type: ignore[no-any-return]
+            solves[0], key
+        ), f"Error: could not find attribute {key} on {solves[0]}"
+        solves.sort(key=lambda s: getattr(s, key))  # type: ignore[no-any-return]
         res = {
             k: list(g)
-            for k, g in itertools.groupby(solves, key=lambda s: getattr(s, group_by))  # type: ignore[no-any-return]
+            for k, g in itertools.groupby(solves, key=lambda s: getattr(s, key))  # type: ignore[no-any-return]
         }
 
-    if _json:
+    if action == "json":
         click.echo(_serialize(res))
-    else:
+    elif action == "repl":
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
+    else:
+        from .solve import run_operations, grouped
+
+        click.echo("==============")
+        for group_name, group_solves in res.items():
+            group_solves.sort(key=lambda s: s.when, reverse=True)
+            click.echo(group_name)
+            click.echo("==============")
+            recent_ao5 = grouped(group_solves, count=5, operation="average")
+            desc = (
+                "--"
+                if isinstance(recent_ao5, Exception)
+                else recent_ao5.describe_average()
+            )
+            click.echo(f"Most recent Ao5 => {desc}")
+            click.echo(f"Solve Count => {len(group_solves)}")
+            stat_data = run_operations(
+                group_solves, operation="average", counts=[5, 12, 50, 100]
+            )
+            for description in stat_data.values():
+                print(description)
+            click.echo("==============")
 
 
 if __name__ == "__main__":

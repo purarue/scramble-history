@@ -37,11 +37,23 @@ class Solve(NamedTuple):
 
     def describe(self) -> str:
         if self.state == State.SOLVED:
-            return f"{self.time:.3f}"
+            return format_decimal(self.time)
         elif self.state == State.DNF:
             return "DNF"
         else:
             return "DNS"
+
+
+def format_decimal(d: Decimal) -> str:
+    """Formats time into h:mm:ss.xxx, removing leftmost places if they are zero"""
+    minutes, seconds = divmod(d, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours > 0:
+        return "{:01d}:{:02d}:{:0>6.3f}".format(int(hours), int(minutes), seconds)
+    elif minutes > 0:
+        return "{:01d}:{:0>6.3f}".format(int(minutes), seconds)
+    else:
+        return "{:0>5.3f}".format(seconds)
 
 
 def findminmax(solves: List[Solve]) -> Tuple[int, int]:
@@ -117,7 +129,7 @@ class Grouping(NamedTuple):
 
     @property
     def lhs(self) -> str:
-        return "DNF" if self.state != State.SOLVED else f"{self.result:.3f}"
+        return "DNF" if self.state != State.SOLVED else format_decimal(self.result)
 
     def describe_average(self) -> str:
         desc = [s.describe() for s in self.solves]
