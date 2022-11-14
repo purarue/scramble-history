@@ -181,6 +181,10 @@ def _parse_merge_inputs(
     return conf
 
 
+def banner() -> None:
+    click.echo("==============")
+
+
 @main.command(
     context_settings=dict(
         ignore_unknown_options=True,
@@ -269,11 +273,11 @@ def merge(
     else:
         from .group_operations import run_operations, grouped
 
-        click.echo("==============")
+        banner()
         for group_name, group_solves in res.items():
             group_solves.sort(key=lambda s: s.when, reverse=True)
             click.echo(group_name)
-            click.echo("==============")
+            banner()
             recent_ao5 = grouped(group_solves, count=5, operation="average")
             desc = (
                 "--"
@@ -287,7 +291,7 @@ def merge(
             )
             for description in stat_data.values():
                 print(description)
-            click.echo("==============")
+            banner()
 
 
 if __name__ == "__main__":
