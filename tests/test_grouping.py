@@ -164,8 +164,8 @@ def test_global_mean() -> None:
 def test_run_operations() -> None:
     ops = run_operations(hundred_solves, operation="average", counts=[5, 12, 50, 100])
     assert ops == {
-        5: "Ao5: 20.620",
-        12: "Ao12: 19.519",
-        50: "Ao50: 19.412",
-        100: "Ao100: 19.423",
+        5: "20.620",
+        12: "19.519",
+        50: "19.412",
+        100: "19.423",
     }
