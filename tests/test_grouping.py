@@ -113,7 +113,7 @@ def test_average() -> None:
     g3 = unwrap(grouped(doubled, operation="average", count=5))
     assert g3.solve_count == 5
     assert len(g3.solves) == 5
-    assert g3.result == Decimal("20.76466666666666666666666667")
+    assert g3.result == Decimal("20.764666666666666827723020105622708797454833984375")
     assert g3.describe() == "Ao5: 20.765 = 21.966 (15.788) (23.533) 18.362 21.966"
 
     g4 = unwrap(grouped([dnf, *solves], operation="average", count=5))
@@ -152,7 +152,7 @@ def test_global_mean() -> None:
     g2 = unwrap(grouped(hundred_solves, operation="global_mean"))
     assert len(g2.solves) == 100
     assert g2.solve_count == 99
-    assert g2.result == Decimal('19.89150505050505050505050505')
+    assert g2.result == Decimal("19.891505050505049467801654827781021595001220703125")
 
     g3 = unwrap(grouped(hundred_solves, operation="global_mean", count=5))
     assert len(g3.solves) == 5

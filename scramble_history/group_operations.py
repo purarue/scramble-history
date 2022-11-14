@@ -1,49 +1,28 @@
 from decimal import Decimal
 from statistics import mean, StatisticsError
-from typing import NamedTuple, Optional, List, Tuple, Dict
+from typing import NamedTuple, Optional, List, Tuple, Dict, Union
+from math import inf
 
 from .models import State, Operation, Solve
 from .error import Res
 from .timeformat import format_decimal
 
 
-def findminmax(solves: List[Solve]) -> Tuple[int, int]:
+def solves_to_float(solves_dec: List[Solve]) -> List[float]:
+    return [inf if s.state != State.SOLVED else float(s.full_time) for s in solves_dec]
+
+
+def findminmax(solves: Union[List[Solve], List[float]]) -> Tuple[int, int]:
     """
     returns indexes of min, max
     """
-    min_i = 0
-    min_val = solves[min_i]
-    max_i = 0
-    max_val = solves[max_i]
-    for i, s in enumerate(solves[1:], 1):
-        # note: if there are multiple DNFs this marks the last DNF as the ignored one
-        # TODO: make configurable?
-        if s.state != State.SOLVED:
-            # DNF/DNS
-            max_i = i
-            max_val = s
-        else:
-            # solve is an actual solve here (not DNF etc.)
-
-            # set max value if larger
-            if max_val.state != State.SOLVED:
-                pass  # already have a DNF, ignore
-            else:
-                if s.full_time > max_val.full_time:
-                    max_i = i
-                    max_val = s
-
-            # set min value if smaller
-
-            # if we had saved a DNF (as the first value) and theres a better one, use that
-            if min_val.state != State.SOLVED and s.state == State.SOLVED:
-                min_i = i
-                min_val = s
-            else:
-                if s.full_time < min_val.full_time:
-                    min_i = i
-                    min_val = s
-
+    solves_enumd: List[Tuple[int, float]]
+    if isinstance(solves[0], Solve):
+        solves_enumd = list(enumerate(solves_to_float(solves)))  # type: ignore[arg-type]
+    else:
+        solves_enumd = list(enumerate(solves))  # type: ignore[arg-type]
+    min_i = min(solves_enumd, key=lambda s: s[1])[0]
+    max_i = max(solves_enumd, key=lambda s: s[1])[0]
     return min_i, max_i
 
 
@@ -93,34 +72,41 @@ class Grouping(NamedTuple):
 
 
 def grouped(
-    solves: List[Solve], operation: Operation, count: Optional[int] = None
+    solves_dc: List[Solve],
+    *,
+    operation: Operation,
+    solves_flt: Optional[List[float]] = None,
+    count: Optional[int] = None,
 ) -> Res[Grouping]:
     """
     solves should be sorted/ordered prior to doing a grouping
     """
+    if solves_flt is None:
+        solves_flt = solves_to_float(solves_dc)
     # error checking
     if operation == "average" or operation == "mean":
         if count is None:
-            count = len(solves)
+            count = len(solves_flt)
         else:
-            if len(solves) < count:
+            if len(solves_flt) < count:
                 return ValueError(
-                    f"Only have {len(solves)} solves, cannot compute {operation} of {count}"
+                    f"Only have {len(solves_flt)} solves, cannot compute {operation} of {count}"
                 )
     if operation == "average" and (
-        len(solves) < 3 or (count is not None and count < 3)
+        len(solves_flt) < 3 or (count is not None and count < 3)
     ):
         return ValueError("Cannot do operation 'average' with less than 3 solves")
 
     # take first 'count' elements if user passed a larger list
-    if count is not None and len(solves) > count:
-        solves = solves[:count]
+    if count is not None and len(solves_flt) > count:
+        solves_flt = solves_flt[:count]
+        solves_dc = solves_dc[:count]
 
-    bad_solves_count = len(list(filter(lambda s: s.state != State.SOLVED, solves)))
+    bad_solves_count = solves_flt.count(inf)
 
     # e.g. not set because this is a global mean
     if count is None:
-        count = len(solves)
+        count = len(solves_dc)
 
     if operation == "mean":
         if bad_solves_count > 0:
@@ -129,14 +115,14 @@ def grouped(
                 state=State.DNF,
                 result=Decimal(0),
                 operation=operation,
-                solves=solves,
+                solves=solves_dc,
             )
         else:
             return Grouping(
                 solve_count=count,
                 state=State.SOLVED,
-                result=mean([s.full_time for s in solves]),
-                solves=solves,
+                result=Decimal(mean([s for s in solves_flt if s != inf])),
+                solves=solves_dc,
                 operation=operation,
             )
     elif operation == "average":
@@ -146,28 +132,24 @@ def grouped(
                 state=State.DNF,
                 result=Decimal(0),
                 operation=operation,
-                solves=solves,
+                solves=solves_dc,
             )
         else:
-            min_i, max_i = findminmax(solves)
+            min_i, max_i = findminmax(solves_flt)
             return Grouping(
                 solve_count=count,
                 state=State.SOLVED,
-                result=mean(
-                    [
-                        s.full_time
-                        for i, s in enumerate(solves)
-                        if i not in {min_i, max_i}
-                    ]
+                result=Decimal(
+                    mean(
+                        [s for i, s in enumerate(solves_flt) if i not in {min_i, max_i}]
+                    )
                 ),
                 operation=operation,
-                solves=solves,
+                solves=solves_dc,
             )
     elif operation == "global_mean":
         try:
-            global_mean = mean(
-                [s.full_time for s in solves if s.state == State.SOLVED]
-            )
+            global_mean = mean([s for s in solves_flt if s != inf])
         except StatisticsError as e:
             return ValueError(str(e) + " - received no valid solves as input")
 
@@ -176,8 +158,8 @@ def grouped(
             solve_count=count - bad_solves_count,
             state=State.SOLVED,
             operation=operation,
-            result=global_mean,
-            solves=solves,
+            result=Decimal(global_mean),
+            solves=solves_dc,
         )
     else:
         raise ValueError(
@@ -193,7 +175,7 @@ def run_operations(
     """
     res: Dict[int, str] = {}
     for c in counts:
-        gr = grouped(solves, operation, count=c)
+        gr = grouped(solves, operation=operation, count=c)
         if isinstance(gr, Exception):
             res[c] = "--"
         else:
@@ -206,27 +188,33 @@ def find_best_group(
     solves: List[Solve], operation: Operation, counts: List[int]
 ) -> Dict[int, Grouping]:
     res: Dict[int, Grouping] = {}
+    solves_flt = solves_to_float(solves)
     for c in counts:
-        for i in range(len(solves) - c + 1):
-            gr = grouped(solves[i:], operation=operation, count=c)
-            if not isinstance(gr, Exception):
-                if c not in res:
-                    res[c] = gr
-                if gr.state == State.SOLVED:
-                    if res[c].state != State.SOLVED:
-                        res[c] = gr
-                    elif gr.result < res[c].result:
-                        res[c] = gr
+        try:
+            res[c] = min(
+                (
+                    g
+                    for g in (
+                        grouped(
+                            solves_dc=solves[i:],
+                            operation=operation,
+                            solves_flt=solves_flt[i:],
+                            count=c,
+                        )
+                        for i in range(len(solves) - c + 1)
+                    )
+                    if not isinstance(g, Exception) and g.state == State.SOLVED
+                ),
+                key=lambda gr: gr.result,
+            )
+        except ValueError as e:
+            if str(e) != "min() arg is an empty sequence":
+                raise e
     return res
 
 
 def find_best(solves: List[Solve]) -> Solve:
     if len(solves) == 0:
         raise ValueError("Tried to find best solve on empty list")
-    best = solves[0]
-    for s in solves[1:]:
-        if best.state == State.DNF and s.state == State.SOLVED:
-            best = s
-        if s.full_time < best.full_time:
-            best = s
-    return best
+    min_i = min(list(enumerate(solves_to_float(solves))), key=lambda o: o[1])[0]
+    return solves[min_i]

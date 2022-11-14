@@ -355,7 +355,7 @@ def merge(
                         ]
                         for count_ in stat_data.keys()
                     ],
-                    headers=(group_name, "Current Average", "Best"),
+                    headers=(group_name, "Current", "Best"),
                 )
             )
 
