@@ -239,7 +239,7 @@ Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.69
 
 #### filter
 
-'attribute_name==attribute_value' - lets you filter based on any of the string values, e.g.:
+`'attribute_name==attribute_value'` - lets you filter based on any of the string values, e.g.:
 
 ```
 comment
