@@ -99,7 +99,7 @@ Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from 
 The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
 
 ```bash
-python3 -m scramble_history merge --action json \
+scramble_history merge --action json \
     --cstimer ~/data/cubing/cstimer/*.json \
     --twistytimer ~/data/cubing/phone_twistytimer/* ~/data/cubing/cubers_io/* ~/data/cubing/manual.csv
 ```
@@ -118,7 +118,7 @@ twistytimer:
 Examples:
 
 ```bash
-$ python3 -m scramble_history merge -g event_description -a json
+$ scramble_history merge -g event_description -a json
  | jq 'to_entries[] | "\(.value | length) \(.key)"' -r | sort -nr
 
 834 3x3 CFOP
@@ -137,7 +137,7 @@ $ python3 -m scramble_history merge -g event_description -a json
 It can also calculate running averages across your merged data:
 
 ```
-$ python3 -m scramble_history merge -a stats
+$ scramble_history merge -a stats
 ==============
 2x2
 ==============
@@ -172,6 +172,29 @@ Ao50: 2:47.116
 Ao100: --
 ```
 
+You can also specifically filter to a solve type or choose an average/mean to run with `--query`:
+
+```
+$ scramble_history merge -q 'event_description==3x3 CFOP' -a stats
+==============
+3x3 CFOP
+==============
+Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
+Solve Count => 834
+Ao5: 19.847
+Ao12: 19.115
+Ao50: 18.603
+Ao100: DNF
+==============
+```
+
+```
+scramble_history merge -q 'event_description==3x3 CFOP' -q Mo3 -q Ao5 -q Ao12
+Mo3: 21.413 = 25.969 22.220 16.050
+Ao5: 22.037 = (25.969) 22.220 (16.050) 22.697 21.193
+Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.697 21.107 16.538 19.144
+```
+
 ## wca results downloader/extractor
 
 This is a WIP -- it does allow you to download the export and extract your times, but not relate those directly to the scrambles from each group
@@ -184,7 +207,7 @@ Also extracts competition/location data for any competitions you've attended
 $ scramble_history export wca update
 [I 221017 23:02:52 wca_export:80] Downloading TSV export...
 [I 221017 23:02:58 wca_export:96] Saved TSV export to /home/sean/.cache/wca_export/tsv
-$ python3 -m scramble_history export wca extract -u 2017BREC02
+$ scramble_history export wca extract -u 2017BREC02
 ...
 
 $ scramble_history export wca extract -u 2017BREC02 --json | jq '.results_w_scrambles | .[] | .[0] | "\(.competitionId) \(.eventId) \(.value1) \(.value2) \(.value3) \(.value4) \(.value5)"' -r

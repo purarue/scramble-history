@@ -1,7 +1,7 @@
 import os
 import itertools
 from pathlib import Path
-from typing import Any, List, Dict, Sequence, Optional
+from typing import Any, List, Dict, Sequence, Optional, Union, Tuple
 from decimal import Decimal
 
 import click
@@ -12,6 +12,7 @@ from .config import (
     group_args_by_options,
     check_config,
 )
+from .query import parse_query, run_query, Query
 
 
 def _default(o: Any) -> Any:
@@ -181,6 +182,12 @@ def _parse_merge_inputs(
     return conf
 
 
+def _parse_query(
+    ctx: click.Context, param: click.Argument, value: Union[Tuple[str], str]
+) -> Query:
+    return parse_query(list(value))
+
+
 def banner() -> None:
     click.echo("==============")
 
@@ -222,6 +229,29 @@ def banner() -> None:
     help="Group parsed results by key",
     default=None,
 )
+@click.option(
+    "-q",
+    "--query",
+    type=click.UNPROCESSED,
+    default=(),
+    multiple=True,
+    callback=_parse_query,
+    help="Solves to filter to, or actions to run",
+)
+@click.option(
+    "-s",
+    "--sort-by",
+    type=click.Choice(["when"]),
+    default="when",
+    help="Sort the resulting solves",
+)
+@click.option(
+    "-r",
+    "--reverse/--no-reverse",
+    is_flag=True,
+    default=True,
+    help="Reverse the sort for --sort-by. --reverse is the default",
+)
 @click.argument(
     "DATAFILES",
     type=click.UNPROCESSED,
@@ -232,6 +262,9 @@ def merge(
     sourcemap_file: Path,
     action: str,
     check: bool,
+    sort_by: Optional[str],
+    reverse: bool,
+    query: Optional[Query],
     group_by: Optional[str],
     datafiles: Dict[str, List[Path]],
 ) -> None:
@@ -245,8 +278,24 @@ def merge(
     if check:
         return
 
+    if sort_by is not None:
+        if sort_by == "when":
+            solves.sort(key=lambda s: s.when, reverse=reverse)
+
+    if query:
+        data = run_query(solves, query=query)
+        # if these were not just a Filter and this modified
+        # the shape/ran something, we should show that
+        if isinstance(data, tuple):
+            for resp in data:
+                print(resp)
+            return
+        else:
+            # we just filtered, so set the solves to what the query returned
+            solves = data
+
     res: Any = solves
-    if group_by is not None or action == "stats":
+    if group_by is not None or action == "stats" and isinstance(res, list):
         if group_by is None:
             click.echo(
                 "Passed 'stats' with no '--group_by', grouping by 'event_description'",
@@ -275,7 +324,7 @@ def merge(
 
         banner()
         for group_name, group_solves in res.items():
-            group_solves.sort(key=lambda s: s.when, reverse=True)
+            group_solves.sort(key=lambda s: s.when, reverse=reverse)
             click.echo(group_name)
             banner()
             recent_ao5 = grouped(group_solves, count=5, operation="average")
