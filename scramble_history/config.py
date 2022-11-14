@@ -5,8 +5,6 @@ from glob import glob as do_glob
 from collections import defaultdict
 from typing import Iterable, List, Union, Optional, Dict, Mapping
 
-import yaml
-
 PathIsh = Union[Path, str]
 Paths = Union[PathIsh, List[PathIsh]]
 
@@ -62,6 +60,8 @@ def parse_config_file(file: Path) -> Dict[str, List[Path]]:
 
 
 def parse_config(data: str) -> Dict[str, List[Path]]:
+    import yaml
+
     buf = io.StringIO(data)
     loaded = yaml.load(buf, Loader=yaml.FullLoader)
     res: ConfigPaths = {}

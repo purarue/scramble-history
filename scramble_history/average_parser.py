@@ -2,8 +2,6 @@ import warnings
 from typing import List, Union, Optional, Tuple
 from decimal import Decimal
 
-import pytimeparse  # type: ignore[import]
-
 from .models import Operation
 
 
@@ -33,6 +31,8 @@ def parse_average(average_str: str) -> List[Union[Decimal, str]]:
 
     If it cannot parse a token/time, it leaves it as a string
     """
+    import pytimeparse  # type: ignore[import]
+
     if "=" in average_str:
         average_str = average_str.split("=", maxsplit=1)[-1]
     average_str = average_str.strip()
