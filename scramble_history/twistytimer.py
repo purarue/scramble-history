@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from more_itertools import unique_everseen
 
-from .state import State
+from .models import State
 
 
 class Solve(NamedTuple):

@@ -10,7 +10,7 @@ from more_itertools import unique_everseen
 
 from .log import logger
 from .cstimer_scramble_type import CSTimerScramble, parse_scramble_type
-from .state import State
+from .models import State
 
 
 class SessionSolve(NamedTuple):

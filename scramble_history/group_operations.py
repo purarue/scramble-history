@@ -1,59 +1,10 @@
-from datetime import datetime
 from decimal import Decimal
 from statistics import mean, StatisticsError
-from typing import NamedTuple, Optional, List, Literal, Tuple, Dict
+from typing import NamedTuple, Optional, List, Tuple, Dict
 
-from .state import State
+from .models import State, Operation, Solve
 from .error import Res
-
-
-class Solve(NamedTuple):
-    """
-    The scramble_history 'merged' Solve model
-    """
-
-    # cstimer: scramble code/manual edit
-    # twistytimer: puzzle
-    # e.g. 333, 444, 222, pyra, skewb, megaminx
-    puzzle: str
-
-    # cstimer scramble code
-    # twistytimer category/manually edit
-    # What this is: e.g. OH, BLD, LSE, F2L
-    event_code: str
-
-    # cstimer CSTimerScramble.name
-    # twistytimer category/manually edit
-    event_description: str
-
-    # if the cube is solved or not
-    state: State
-    # standard user-facing stuff here
-    scramble: str
-    comment: Optional[str]
-    time: Decimal
-    penalty: Decimal
-    when: datetime
-
-    def describe(self) -> str:
-        if self.state == State.SOLVED:
-            return format_decimal(self.time)
-        elif self.state == State.DNF:
-            return "DNF"
-        else:
-            return "DNS"
-
-
-def format_decimal(d: Decimal) -> str:
-    """Formats time into h:mm:ss.xxx, removing leftmost places if they are zero"""
-    minutes, seconds = divmod(d, 60)
-    hours, minutes = divmod(minutes, 60)
-    if hours > 0:
-        return "{:01d}:{:02d}:{:0>6.3f}".format(int(hours), int(minutes), seconds)
-    elif minutes > 0:
-        return "{:01d}:{:0>6.3f}".format(int(minutes), seconds)
-    else:
-        return "{:0>5.3f}".format(seconds)
+from .timeformat import format_decimal
 
 
 def findminmax(solves: List[Solve]) -> Tuple[int, int]:
@@ -94,9 +45,6 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
                     min_val = s
 
     return min_i, max_i
-
-
-Operation = Literal["average", "mean", "global_mean"]
 
 
 def operation_code(operation: Operation, count: int, solves_len: int) -> str:

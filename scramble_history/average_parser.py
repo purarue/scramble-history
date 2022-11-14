@@ -1,8 +1,10 @@
 import warnings
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Tuple
 from decimal import Decimal
 
 import pytimeparse  # type: ignore[import]
+
+from .models import Operation
 
 
 def _is_float_like(s: str) -> bool:
@@ -59,3 +61,12 @@ def parse_average(average_str: str) -> List[Union[Decimal, str]]:
             else:
                 solves.append(Decimal(td))
     return solves
+
+
+def parse_operation_code(op: str) -> Tuple[Operation, int]:
+    op = op.lower().lower()
+    if op.startswith("ao"):
+        return "average", int(op[2:])
+    elif op.startswith("mo"):
+        return "mean", int(op[2:])
+    raise ValueError(f"{op} does not start with 'Ao' (average of) or 'Mo' (mean)")

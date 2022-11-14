@@ -3,8 +3,8 @@ from decimal import Decimal
 
 import more_itertools
 
-from scramble_history.state import State
-from scramble_history.solve import Solve, grouped, run_operations
+from scramble_history.models import Solve, State
+from scramble_history.group_operations import Solve, grouped, run_operations
 from scramble_history.error import unwrap
 
 dnf = Solve(

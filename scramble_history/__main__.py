@@ -273,7 +273,7 @@ def merge(
         header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
     else:
-        from .solve import run_operations, grouped
+        from .group_operations import run_operations, grouped
 
         click.echo("==============")
         for group_name, group_solves in res.items():

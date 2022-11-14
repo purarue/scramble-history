@@ -14,7 +14,7 @@ from prompt_toolkit.completion import FuzzyWordCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.validation import Validator, ValidationError
 
-from .solve import Solve
+from .models import Solve
 
 
 class SourceMap(NamedTuple):
