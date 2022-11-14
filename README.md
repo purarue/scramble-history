@@ -76,6 +76,9 @@ Options:
   -C, --check                     Dont print/interact, just check that all solves are transformed properly
   -g, --group-by [puzzle|event_code|event_description]
                                   Group parsed results by key
+  -q, --query TEXT                Solves to filter to, or actions to run
+  -s, --sort-by [when]            Sort the resulting solves
+  -r, --reverse / --no-reverse    Reverse the sort for --sort-by. --reverse is the default
   --help                          Show this message and exit.
 ```
 
