@@ -16,10 +16,17 @@ class Average(NamedTuple):
     count_: int
 
 
+class Drop(NamedTuple):
+    count_: int
+
+
+class Limit(NamedTuple):
+    count_: int
+
+
 Commands = Literal["dump"]
 
-
-QueryPart = Union[Filter, Average, Commands]
+QueryPart = Union[Filter, Average, Commands, Drop, Limit]
 
 Query = List[QueryPart]
 
@@ -55,9 +62,13 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
 
         if token.lower() in {"dump"}:
             parsed.append("dump")
-            continue
+        elif token.lower().startswith("drop:"):
+            parsed.append(Drop(int(token.split("drop:", maxsplit=1)[-1])))
+        elif token.lower().startswith("limit:"):
+            parsed.append(Limit(int(token.split("limit:", maxsplit=1)[-1])))
 
-        raise ValueError(f"Query: not sure how to parse token '{token}'")
+        else:
+            raise ValueError(f"Query: not sure how to parse token '{token}'")
 
     return parsed
 
@@ -75,13 +86,16 @@ def run_query(solves: List[Solve], *, query: Query) -> QueryRet:
                 solves[0], qr.attr
             ), f"could not find attribute {qr} on {solves[0]}"
             solves = list(filter(lambda solv: getattr(solv, qr.attr) == qr.value, solves))  # type: ignore[arg-type]
-        elif isinstance(qr, str):
-            assert qr == "dump"
-            returns.append("\n".join([s.describe() for s in solves]))
-        else:
-            assert isinstance(qr, Average)
+        elif isinstance(qr, Average):
             g = unwrap(grouped(solves, operation=qr.operation, count=qr.count_))
             returns.append(g.describe())
+        elif isinstance(qr, Drop):
+            solves = solves[qr.count_ :]
+        elif isinstance(qr, Limit):
+            solves = solves[: qr.count_]
+        else:
+            assert qr == "dump", str(qr)
+            returns.append("\n".join([s.describe() for s in solves]))
 
     if len(returns) == 0:
         return solves

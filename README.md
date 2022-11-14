@@ -141,55 +141,75 @@ It can also calculate running averages across your merged data:
 
 ```
 $ scramble_history merge -a stats
-==============
+===================
 2x2
-==============
+===================
 Most recent Ao5 => 6.437 = 5.680 7.220 (DNF) 6.410 (5.480)
-Ao5: 6.437
-Ao12: 8.215
-Ao50: 7.381
-Ao100: 7.582
-==============
-3x3 CFOP
-==============
-Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
-Ao5: 19.847
-Ao12: 19.115
-Ao50: 18.603
-Ao100: DNF
-==============
-3x3 CFOP OH
-==============
-Most recent Ao5 => 29.327 = 29.800 (34.950) 27.750 (26.710) 30.430
-Ao5: 29.327
-Ao12: 29.879
-Ao50: 32.892
-Ao100: 33.766
-==============
-4x4
-==============
-Most recent Ao5 => 2:41.123 = 2:53.280 (3:31.680) (2:14.690) 2:50.200 2:19.890
-Ao5: 2:41.123
-Ao12: 2:38.749
-Ao50: 2:47.116
-Ao100: --
-```
+Solve Count => 295
 
-You can also specifically filter to a solve type or choose an average/mean to run with `--query`:
-
-```
-$ scramble_history merge -q 'event_description==3x3 CFOP' -a stats
-==============
+2x2      Current Average    Best
+-----  -----------------  ------
+Ao5                6.437   5.58
+Ao12               8.215   6.252
+Ao50               7.381   7.214
+Ao100              7.582   7.562
+===================
 3x3 CFOP
-==============
+===================
 Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
 Solve Count => 834
-Ao5: 19.847
-Ao12: 19.115
-Ao50: 18.603
-Ao100: DNF
-==============
+
+3x3 CFOP    Current Average      Best
+----------  -----------------  ------
+Ao5         19.847             14.647
+Ao12        19.115             16.809
+Ao50        18.603             18.05
+Ao100       DNF                18.444
+===================
+3x3 CFOP OH
+===================
+Most recent Ao5 => 29.327 = 29.800 (34.950) 27.750 (26.710) 30.430
+Solve Count => 112
+
+3x3 CFOP OH      Current Average    Best
+-------------  -----------------  ------
+Ao5                       29.327  26.61
+Ao12                      29.879  29.697
+Ao50                      32.892  32.285
+Ao100                     33.766  33.766
+===================
+4x4
+===================
+Most recent Ao5 => 2:41.123 = 2:53.280 (3:31.680) (2:14.690) 2:50.200 2:19.890
+Solve Count => 65
+
+4x4    Current Average    Best
+-----  -----------------  --------
+Ao5    2:41.123           2:26.253
+Ao12   2:38.749           2:29.842
+Ao50   2:47.116           2:47.116
+Ao100  --                 --
 ```
+
+You can also specifically filter to a solve type with `--query`:
+
+```
+$ scramble_history merge --query 'event_description==3x3 CFOP' -a stats
+===================
+3x3 CFOP
+===================
+Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
+Solve Count => 834
+
+3x3 CFOP    Current Average      Best
+----------  -----------------  ------
+Ao5         19.847             14.647
+Ao12        19.115             16.809
+Ao50        18.603             18.05
+Ao100       DNF                18.444
+```
+
+Or provide other commands to run instead of `--action stats`:
 
 ```
 scramble_history merge -q 'event_description==3x3 CFOP' -q Mo3 -q Ao5 -q Ao12
@@ -197,6 +217,64 @@ Mo3: 21.413 = 25.969 22.220 16.050
 Ao5: 22.037 = (25.969) 22.220 (16.050) 22.697 21.193
 Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.697 21.107 16.538 19.144
 ```
+
+### merge query commands:
+
+#### filter
+
+'attribute_name==attribute_value' - lets you filter based on any of the string values, e.g.:
+
+```
+comment
+event_code
+event_description
+puzzle
+scramble
+```
+
+Examples:
+
+- `'event_description==3x3 CFOP'`
+- `'puzzle==skewb'`
+- `'puzzle==skewb'`
+
+#### drop/limit
+
+`drop:n` or `limit:n` where `n` is a number. This can be used in between commands to update the current solve list. E.g.:
+
+Drop removes `n` items at the beginning of the list, limit keeps the first `n` items
+
+```
+scramble_history merge -q 'puzzle==222' -q Ao5 -q 'drop:3' -q Mo2
+Ao5: 6.437 = 5.680 7.220 (DNF) 6.410 (5.480)
+Mo2: 5.945 = 6.410 5.480
+```
+
+```
+$ scramble_history merge -q 'event_description==3x3 CFOP' -q 'limit:5' -q dump
+19.520
+16.040
+18.240
+21.780
+23.980
+```
+
+#### dump
+
+Prints the time/description (if DNF) for each solve:
+
+```
+$ scramble_history merge -q 'puzzle==222' -q 'limit:5' -q dump
+5.680
+7.220
+DNF
+6.410
+5.480
+```
+
+#### compute averages
+
+`Aon` or `Mon`, where 'n' is a number. Examples: `Ao5`, `Ao500`, `Mo10`
 
 ## wca results downloader/extractor
 

@@ -189,9 +189,26 @@ def run_operations(
     for c in counts:
         gr = grouped(solves, operation, count=c)
         if isinstance(gr, Exception):
-            code = operation_code(operation, c, c)
-            res[c] = f"{code}: --"
+            res[c] = "--"
         else:
-            res[c] = f"{gr.operation_code}: {gr.lhs}"
+            res[c] = gr.lhs
 
+    return res
+
+
+def find_best(
+    solves: List[Solve], operation: Operation, counts: List[int]
+) -> Dict[int, Grouping]:
+    res: Dict[int, Grouping] = {}
+    for c in counts:
+        for i in range(len(solves) - c + 1):
+            gr = grouped(solves[i:], operation=operation, count=c)
+            if not isinstance(gr, Exception):
+                if c not in res:
+                    res[c] = gr
+                if gr.state == State.SOLVED:
+                    if res[c].state != State.SOLVED:
+                        res[c] = gr
+                    elif gr.result < res[c].result:
+                        res[c] = gr
     return res

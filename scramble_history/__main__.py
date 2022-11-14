@@ -189,7 +189,7 @@ def _parse_query(
 
 
 def banner() -> None:
-    click.echo("==============")
+    click.echo("===================")
 
 
 @main.command(
@@ -320,11 +320,13 @@ def merge(
         header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
     else:
-        from .group_operations import run_operations, grouped
+        from .group_operations import run_operations, grouped, find_best, operation_code
+        from .timeformat import format_decimal
+        from tabulate import tabulate
 
-        banner()
         for group_name, group_solves in res.items():
             group_solves.sort(key=lambda s: s.when, reverse=reverse)
+            banner()
             click.echo(group_name)
             banner()
             recent_ao5 = grouped(group_solves, count=5, operation="average")
@@ -338,9 +340,23 @@ def merge(
             stat_data = run_operations(
                 group_solves, operation="average", counts=[5, 12, 50, 100]
             )
-            for description in stat_data.values():
-                print(description)
-            banner()
+            best = find_best(group_solves, operation="average", counts=[5, 12, 50, 100])
+            click.echo()
+            click.echo(
+                tabulate(
+                    [
+                        [
+                            operation_code("average", count_, count_),
+                            stat_data[count_],
+                            format_decimal(best[count_].result)
+                            if count_ in best
+                            else "--",
+                        ]
+                        for count_ in stat_data.keys()
+                    ],
+                    headers=(group_name, "Current Average", "Best"),
+                )
+            )
 
 
 if __name__ == "__main__":
