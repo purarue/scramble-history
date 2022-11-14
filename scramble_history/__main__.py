@@ -183,7 +183,9 @@ def _parse_merge_inputs(
 
 
 def _parse_query(
-    ctx: click.Context, param: click.Argument, value: Sequence[str],
+    ctx: click.Context,
+    param: click.Argument,
+    value: Sequence[str],
 ) -> Query:
     return parse_query(list(value))
 
@@ -320,7 +322,13 @@ def merge(
         header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
     else:
-        from .group_operations import run_operations, grouped, find_best_group, operation_code, find_best
+        from .group_operations import (
+            run_operations,
+            grouped,
+            find_best_group,
+            operation_code,
+            find_best,
+        )
         from .timeformat import format_decimal
         from tabulate import tabulate
 
@@ -341,7 +349,9 @@ def merge(
             stat_data = run_operations(
                 group_solves, operation="average", counts=[5, 12, 50, 100]
             )
-            best = find_best_group(group_solves, operation="average", counts=[5, 12, 50, 100])
+            best = find_best_group(
+                group_solves, operation="average", counts=[5, 12, 50, 100]
+            )
             click.echo()
             click.echo(
                 tabulate(

@@ -93,7 +93,7 @@ class SourceMerger:
 
     def _create_validator(
         self, key: str, defaults: Dict[str, Any]
-    ) -> 'FuzzyWordCompleter':
+    ) -> "FuzzyWordCompleter":
         tokens = [getattr(s, key) for s in self.sourcemap]
         if defaults.get(key):
             tokens.append(defaults[key])

@@ -289,6 +289,15 @@ DNF
 5.480
 ```
 
+### best
+
+Prints the best solve from a list of solves:
+
+```
+$ scramble_history merge -q 'puzzle==222' -q best
+3.121
+```
+
 #### compute averages
 
 `Aon` or `Mon`, where 'n' is a number. Examples: `Ao5`, `Ao500`, `Mo10`
