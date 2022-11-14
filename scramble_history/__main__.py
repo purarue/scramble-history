@@ -1,7 +1,7 @@
 import os
 import itertools
 from pathlib import Path
-from typing import Any, List, Dict, Sequence, Optional, Union, Tuple
+from typing import Any, List, Dict, Sequence, Optional
 from decimal import Decimal
 
 import click
@@ -183,7 +183,7 @@ def _parse_merge_inputs(
 
 
 def _parse_query(
-    ctx: click.Context, param: click.Argument, value: Union[Tuple[str], str]
+    ctx: click.Context, param: click.Argument, value: Sequence[str],
 ) -> Query:
     return parse_query(list(value))
 
