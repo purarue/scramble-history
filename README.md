@@ -240,9 +240,9 @@ Examples:
 
 #### drop/limit
 
-`drop:n` or `limit:n` where `n` is a number. This can be used in between commands to update the current solve list. E.g.:
+`drop:n` or `limit:n` where `n` is a number. This can be used in between commands to update the current solve list.
 
-Drop removes `n` items at the beginning of the list, limit keeps the first `n` items
+Drop removes `n` items at the beginning of the list, limit keeps the first `n` items. For example:
 
 ```
 scramble_history merge -q 'puzzle==222' -q Ao5 -q 'drop:3' -q Mo2
