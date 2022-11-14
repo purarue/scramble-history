@@ -8,6 +8,7 @@ import json
 import warnings
 from pprint import pprint
 from pathlib import Path
+from dataclasses import is_dataclass, asdict
 from typing import NamedTuple, Optional, Any, Dict, List, Iterator, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -68,6 +69,7 @@ class SourceMerger:
         # define inline so this is only imported when its needed to add new solves
         from prompt_toolkit import prompt
         from prompt_toolkit.document import Document
+        from prompt_toolkit.completion import FuzzyWordCompleter
         from prompt_toolkit.validation import Validator, ValidationError
 
         class HasattrValidator(Validator):
@@ -84,16 +86,35 @@ class SourceMerger:
                             message=f"Could not find key {key} on {self.check_obj}"
                         )
 
+        possible_keys = []
+        if isinstance(data, dict):
+            possible_keys.extend(list(data.keys()))
+        elif is_dataclass(data):
+            possible_keys.extend(list(asdict(data).keys()))
+        elif hasattr(data, "_asdict") and callable(data._asdict):
+            possible_keys.extend(list(data._asdict().keys()))
+        elif hasattr(data, "__dict__"):
+            possible_keys.extend(list(data.__dict__.keys()))
+
+        example = "puzzle\nraw_scramble_type\nname"
+        completer = None
+        if possible_keys:
+            example = "\n".join(possible_keys)
+            completer = FuzzyWordCompleter(list(set(possible_keys)))
+
         validator = HasattrValidator(data)
         text = prompt(
-            "Which keys (e.g. puzzle, name) should be used to identify solves like this\nIf needed, enter multiple keys, separated by spaces, e.g. 'scramble_code name': ",
+            f"Which keys should be used to identify solves like this?\nE.g.:\n{example}\nIf needed, enter multiple keys, separated by spaces, e.g. 'scramble_code name': ",
             validator=validator,
+            completer=completer,
         )
         return text.strip().split()
 
     def _create_validator(
         self, key: str, defaults: Dict[str, Any]
     ) -> "FuzzyWordCompleter":
+        from prompt_toolkit.completion import FuzzyWordCompleter
+
         tokens = [getattr(s, key) for s in self.sourcemap]
         if defaults.get(key):
             tokens.append(defaults[key])
