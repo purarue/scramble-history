@@ -64,6 +64,21 @@ $ scramble_history parse twistytimer --json Backup_2022-10-17_20-19.txt | jq '.[
 
 ## merge
 
+```
+Usage: scramble_history merge [OPTIONS] [DATAFILES]
+
+  merge solves from different data sources together
+
+Options:
+  -s, --sourcemap-file FILE       Data file which saves choices on how to map solves from different sources
+                                  [default: /home/sean/.config/scramble_history_sourcemap.json]
+  -a, --action [json|repl|stats]  what to do with merged solves  [default: repl]
+  -C, --check                     Dont print/interact, just check that all solves are transformed properly
+  -g, --group-by [puzzle|event_code|event_description]
+                                  Group parsed results by key
+  --help                          Show this message and exit.
+```
+
 The merge command lets you combine solves from different sources into a normalized schema. It does this by prompting you to define attributes from each solve to look for, and then converts any solve it finds with those values to the same description. For example:
 
 ```json
@@ -84,15 +99,26 @@ Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from 
 The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
 
 ```bash
-python3 -m scramble_history merge -j \
+python3 -m scramble_history merge --action json \
     --cstimer ~/data/cubing/cstimer/*.json \
     --twistytimer ~/data/cubing/phone_twistytimer/* ~/data/cubing/cubers_io/* ~/data/cubing/manual.csv
+```
+
+You can also create a config file at `~/.config/scramble_history.yaml` (location can be changed with the `SCRAMBLE_HISTORY_CONFIG` environment variable) which contains similar info, so you don't have to type it out every time:
+
+```yaml
+cstimer:
+  - ~/data/cubing/cstimer/*.json
+twistytimer:
+  - ~/data/cubing/manual.csv
+  - ~/data/cubing/phone_twistytimer/*.txt
+  - ~/data/cubing/cubers_io/*.txt
 ```
 
 Examples:
 
 ```bash
-$ python3 -m scramble_history merge -g event_description -j --cstimer .. --twistytimer .. \
+$ python3 -m scramble_history merge -g event_description -a json
  | jq 'to_entries[] | "\(.value | length) \(.key)"' -r | sort -nr
 
 834 3x3 CFOP
@@ -111,7 +137,7 @@ $ python3 -m scramble_history merge -g event_description -j --cstimer .. --twist
 It can also calculate running averages across your merged data:
 
 ```
-$ python3 -m scramble_history merge ... -a stats
+$ python3 -m scramble_history merge -a stats
 ==============
 2x2
 ==============

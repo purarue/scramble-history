@@ -1,12 +1,17 @@
 import os
-import sys
 import itertools
 from pathlib import Path
-from collections import defaultdict
-from typing import Any, List, Dict, Sequence, Mapping, Optional
+from typing import Any, List, Dict, Sequence, Optional
 from decimal import Decimal
 
 import click
+
+from .config import (
+    parse_config_file,
+    ConfigPaths,
+    group_args_by_options,
+    check_config,
+)
 
 
 def _default(o: Any) -> Any:
@@ -145,33 +150,35 @@ def twistytimer(_json: bool, twistytimer_file: Path) -> None:
         IPython.embed(header=header)
 
 
-KNOWN_PARSERS = {"--cstimer", "--twistytimer"}
+config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
+
+# this needs to be a global path that user cant modify in click option
+# so _parse_merge_inputs can access it
+config_file = Path(
+    os.environ.get("SCRAMBLE_HISTORY_CONFIG", config_dir / "scramble_history.yaml")
+)
 
 
 def _parse_merge_inputs(
     ctx: click.Context, param: click.Argument, value: Sequence[str]
-) -> Dict[str, List[Path]]:
-    if len(value) < 1:
-        raise click.BadArgumentUsage("Must supply some datafiles as input")
-    parsed: Mapping[str, List[Path]] = defaultdict(list)
-    val = list(value)
-    parser: Optional[str] = None
-    for p in val:
-        if parser is None or p.startswith("--"):
-            if p not in KNOWN_PARSERS:
-                raise click.BadArgumentUsage(
-                    f"Unknown option filetype {p}, should be one of {KNOWN_PARSERS}"
-                )
-            parser = p
-        else:
-            pp = Path(p)
-            if not pp.exists():
-                raise click.BadArgumentUsage(f"Filepath '{pp}' does not exist")
-            parsed[parser].append(pp)
-    return dict(parsed)
+) -> ConfigPaths:
+    conf = {}
+    if config_file.exists():
+        conf = parse_config_file(config_file)
 
+    if len(value) < 1 and len(conf) == 0:
+        raise click.BadArgumentUsage(
+            f"Must supply options/datafiles as input or create a config file at {config_file}"
+        )
+    try:
+        # merge any options into dictionary if supplied in addition to config file
+        for k, v in group_args_by_options(list(value)).items():
+            conf[k] = conf.get(k, []) + v
+    except ValueError as e:
+        raise click.BadArgumentUsage(str(e))
 
-config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
+    check_config(conf)
+    return conf
 
 
 @main.command(
@@ -184,7 +191,7 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
 @click.option(
     "-s",
     "--sourcemap-file",
-    help="Configuration/data file which saves choices on how to map solves from different sources",
+    help="Data file which saves choices on how to map solves from different sources",
     default=config_dir / "scramble_history_sourcemap.json",
     show_default=True,
     type=click.Path(dir_okay=False, path_type=Path),
@@ -198,7 +205,7 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
     show_default=True,
 )
 @click.option(
-    "-c",
+    "-C",
     "--check",
     help="Dont print/interact, just check that all solves are transformed properly",
     is_flag=True,
@@ -212,7 +219,10 @@ config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
     default=None,
 )
 @click.argument(
-    "DATAFILES", nargs=-1, type=click.UNPROCESSED, callback=_parse_merge_inputs
+    "DATAFILES",
+    type=click.UNPROCESSED,
+    callback=_parse_merge_inputs,
+    default=(),
 )
 def merge(
     sourcemap_file: Path,
@@ -222,27 +232,11 @@ def merge(
     datafiles: Dict[str, List[Path]],
 ) -> None:
     """
-    merge different data sources together
+    merge solves from different data sources together
     """
-    from .source_merger import SourceMerger, Solve
-    from .cstimer import parse_files as cstimer_merge
-    from .twistytimer import parse_files as twistytimer_merge
+    from .source_merger import merge as merge_solves
 
-    merger = SourceMerger(sourcemap_file)
-
-    solves: List[Solve] = []
-
-    for flag, grouped_files in datafiles.items():
-        assert flag in KNOWN_PARSERS
-        mergefunc = cstimer_merge if flag == "--cstimer" else twistytimer_merge
-        slv = list(mergefunc(grouped_files))
-        if len(slv) == 0:
-            click.echo(
-                f"Did not parse any solves from {flag} {grouped_files}, double check to make sure inputs are correct",
-                err=True,
-            )
-            sys.exit(1)
-        solves.extend(map(merger.transform, slv))
+    solves = list(merge_solves(sourcemap_file=sourcemap_file, conf=datafiles))
 
     if check:
         return

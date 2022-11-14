@@ -5,9 +5,10 @@ to a shared categorization system
 """
 
 import json
+import warnings
 from pprint import pprint
 from pathlib import Path
-from typing import NamedTuple, Optional, Any, Dict, List
+from typing import NamedTuple, Optional, Any, Dict, List, Iterator
 
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import FuzzyWordCompleter
@@ -155,3 +156,24 @@ class SourceMerger:
             event_description=sourcemap.transformed_event_description,
             **transformed_data,
         )
+
+
+from .config import KNOWN_PARSERS, ConfigPaths
+
+
+def merge(sourcemap_file: Path, conf: ConfigPaths) -> Iterator[Solve]:
+    from .source_merger import SourceMerger
+    from .cstimer import parse_files as cstimer_merge
+    from .twistytimer import parse_files as twistytimer_merge
+
+    merger = SourceMerger(sourcemap_file)
+
+    for flag, grouped_files in conf.items():
+        assert flag in KNOWN_PARSERS
+        mergefunc = cstimer_merge if flag == "cstimer" else twistytimer_merge
+        slv = list(mergefunc(grouped_files))
+        if len(slv) == 0:
+            warnings.warn(
+                f"Did not parse any solves from {flag} {grouped_files}, double check to make sure inputs are correct"
+            )
+        yield from map(merger.transform, slv)
