@@ -60,8 +60,10 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
         except ValueError:
             pass
 
-        if token.lower() in {"dump", "best"}:
-            parsed.append(token.lower())
+        if token.lower() == "dump":
+            parsed.append("dump")
+        elif token.lower() == "best":
+            parsed.append("best")
         elif token.lower().startswith("drop:"):
             parsed.append(Drop(int(token.split("drop:", maxsplit=1)[-1])))
         elif token.lower().startswith("limit:"):

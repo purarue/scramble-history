@@ -60,6 +60,7 @@ class Solve(NamedTuple):
             time=self.solve_time,
             penalty=self.penalty,
             when=self.when,
+            full_time=self.solve_time + self.penalty,
         )
 
 

@@ -16,6 +16,7 @@ dnf = Solve(
     comment="",
     time=Decimal("15.254"),
     penalty=Decimal("0"),
+    full_time=Decimal("15.254"),
     when=datetime.datetime(2022, 11, 3, 6, 36, 39, tzinfo=datetime.timezone.utc),
 )
 
@@ -28,6 +29,7 @@ solves = [
         scramble="R' U2 D2 R F L2 F2 D F U2 L2 D R2 U' F2 D B2 L2 U2 L2",
         comment="",
         time=Decimal("21.966"),
+        full_time=Decimal("21.966"),
         penalty=Decimal("0"),
         when=datetime.datetime(2022, 11, 3, 6, 37, 23, tzinfo=datetime.timezone.utc),
     ),
@@ -39,6 +41,7 @@ solves = [
         scramble="L U L B' L B2 R2 L B F2 U2 D R2 D L2 F2 L2 U' F2",
         comment="",
         time=Decimal("15.788"),
+        full_time=Decimal("15.788"),
         penalty=Decimal("0"),
         when=datetime.datetime(2022, 11, 3, 6, 38, 3, tzinfo=datetime.timezone.utc),
     ),
@@ -50,6 +53,7 @@ solves = [
         scramble="F2 D' B2 R2 F2 U R2 D2 U' L2 B2 D' F L2 B L' D2 R2 F' D' R'",
         comment="",
         time=Decimal("23.533"),
+        full_time=Decimal("23.533"),
         penalty=Decimal("0"),
         when=datetime.datetime(2022, 11, 3, 6, 38, 39, tzinfo=datetime.timezone.utc),
     ),
@@ -61,7 +65,8 @@ solves = [
         scramble="U2 L F' U2 F U' D' L R2 B2 D2 B' L2 F' L2 F2 D2 R2 D2 L",
         comment="",
         time=Decimal("16.362"),
-        penalty=Decimal("0"),
+        full_time=Decimal("18.362"),
+        penalty=Decimal("2"),
         when=datetime.datetime(2022, 11, 3, 6, 39, 20, tzinfo=datetime.timezone.utc),
     ),
 ]
@@ -108,15 +113,15 @@ def test_average() -> None:
     g3 = unwrap(grouped(doubled, operation="average", count=5))
     assert g3.solve_count == 5
     assert len(g3.solves) == 5
-    assert g3.result == Decimal("20.098")
-    assert g3.describe() == "Ao5: 20.098 = 21.966 (15.788) (23.533) 16.362 21.966"
+    assert g3.result == Decimal("20.76466666666666666666666667")
+    assert g3.describe() == "Ao5: 20.765 = 21.966 (15.788) (23.533) 18.362 21.966"
 
     g4 = unwrap(grouped([dnf, *solves], operation="average", count=5))
     assert g4.solve_count == 5
     assert len(g4.solves) == 5
     assert g4.state == State.SOLVED
     assert g4.solves == [dnf, *solves]
-    assert g4.describe_average() == "20.620 = (DNF) 21.966 (15.788) 23.533 16.362"
+    assert g4.describe_average() == "21.287 = (DNF) 21.966 (15.788) 23.533 18.362"
 
     g5 = unwrap(grouped([dnf, dnf, *solves], operation="average", count=5))
     assert g5.state == State.DNF
@@ -129,7 +134,7 @@ def test_average() -> None:
     assert g6.operation_code == "Ao100"
     assert (
         g6.describe()
-        == "Ao100: 19.423 = (DNF) (15.788) 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362 21.966 15.788 23.533 16.362"
+        == "Ao100: 19.933 = (DNF) (15.788) 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362 21.966 15.788 23.533 18.362"
     )
     solve_times = [s.time for s in g6.solves if s.state == State.SOLVED]
     min_solve = min(solve_times)
@@ -147,12 +152,12 @@ def test_global_mean() -> None:
     g2 = unwrap(grouped(hundred_solves, operation="global_mean"))
     assert len(g2.solves) == 100
     assert g2.solve_count == 99
-    assert g2.result == Decimal("19.38645454545454545454545455")
+    assert g2.result == Decimal('19.89150505050505050505050505')
 
     g3 = unwrap(grouped(hundred_solves, operation="global_mean", count=5))
     assert len(g3.solves) == 5
     assert g3.solve_count == 4
-    assert g3.describe() == "GlobalMean (4/5): 19.412 = DNF 15.788 23.533 16.362 21.966"
+    assert g3.describe() == "GlobalMean (4/5): 19.912 = DNF 15.788 23.533 18.362 21.966"
     assert g3.operation_code == "GlobalMean (4/5)"
 
     g4 = unwrap(grouped([dnf, dnf, solves[0]], operation="global_mean"))
@@ -163,9 +168,4 @@ def test_global_mean() -> None:
 
 def test_run_operations() -> None:
     ops = run_operations(hundred_solves, operation="average", counts=[5, 12, 50, 100])
-    assert ops == {
-        5: "20.620",
-        12: "19.519",
-        50: "19.412",
-        100: "19.423",
-    }
+    assert ops == {5: "21.287", 12: "20.119", 50: "19.912", 100: "19.933"}

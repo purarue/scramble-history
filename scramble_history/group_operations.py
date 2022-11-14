@@ -29,7 +29,7 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
             if max_val.state != State.SOLVED:
                 pass  # already have a DNF, ignore
             else:
-                if s.full_time() > max_val.full_time():
+                if s.full_time > max_val.full_time:
                     max_i = i
                     max_val = s
 
@@ -40,7 +40,7 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
                 min_i = i
                 min_val = s
             else:
-                if s.full_time() < min_val.full_time():
+                if s.full_time < min_val.full_time:
                     min_i = i
                     min_val = s
 
@@ -135,7 +135,7 @@ def grouped(
             return Grouping(
                 solve_count=count,
                 state=State.SOLVED,
-                result=mean([s.full_time() for s in solves]),
+                result=mean([s.full_time for s in solves]),
                 solves=solves,
                 operation=operation,
             )
@@ -155,7 +155,7 @@ def grouped(
                 state=State.SOLVED,
                 result=mean(
                     [
-                        s.full_time()
+                        s.full_time
                         for i, s in enumerate(solves)
                         if i not in {min_i, max_i}
                     ]
@@ -166,7 +166,7 @@ def grouped(
     elif operation == "global_mean":
         try:
             global_mean = mean(
-                [s.full_time() for s in solves if s.state == State.SOLVED]
+                [s.full_time for s in solves if s.state == State.SOLVED]
             )
         except StatisticsError as e:
             return ValueError(str(e) + " - received no valid solves as input")
@@ -227,6 +227,6 @@ def find_best(solves: List[Solve]) -> Solve:
     for s in solves[1:]:
         if best.state == State.DNF and s.state == State.SOLVED:
             best = s
-        if s.full_time() < best.full_time():
+        if s.full_time < best.full_time:
             best = s
     return best

@@ -1,8 +1,8 @@
 from enum import Enum
 from datetime import datetime
-from typing import Literal, NamedTuple, Optional
+from dataclasses import dataclass
+from typing import Literal, Optional
 from decimal import Decimal
-from functools import lru_cache
 
 from .timeformat import format_decimal
 
@@ -15,10 +15,24 @@ class State(Enum):
     DNF = "DNF"
 
 
-class Solve(NamedTuple):
+@dataclass(frozen=True)
+class Solve:
     """
     The scramble_history 'merged' Solve model
     """
+
+    __slots__ = [
+        "puzzle",
+        "event_code",
+        "event_description",
+        "state",
+        "scramble",
+        "comment",
+        "time",
+        "penalty",
+        "when",
+        "full_time",
+    ]
 
     # cstimer: scramble code/manual edit
     # twistytimer: puzzle
@@ -41,16 +55,14 @@ class Solve(NamedTuple):
     comment: Optional[str]
     time: Decimal
     penalty: Decimal
+
+    # penalty + time
+    full_time: Decimal
     when: datetime
 
-    @lru_cache(maxsize=1)
-    def full_time(self) -> Decimal:
-        return self.time + self.penalty
-
-    @lru_cache(maxsize=1)
     def describe(self) -> str:
         if self.state == State.SOLVED:
-            return format_decimal(self.full_time())
+            return format_decimal(self.full_time)
         elif self.state == State.DNF:
             return "DNF"
         else:
