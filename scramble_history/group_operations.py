@@ -15,7 +15,7 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
     min_val = solves[min_i]
     max_i = 0
     max_val = solves[max_i]
-    for i, s in enumerate(solves):
+    for i, s in enumerate(solves[1:], 1):
         # note: if there are multiple DNFs this marks the last DNF as the ignored one
         # TODO: make configurable?
         if s.state != State.SOLVED:
@@ -29,7 +29,7 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
             if max_val.state != State.SOLVED:
                 pass  # already have a DNF, ignore
             else:
-                if s.time > max_val.time:
+                if s.full_time() > max_val.full_time():
                     max_i = i
                     max_val = s
 
@@ -40,7 +40,7 @@ def findminmax(solves: List[Solve]) -> Tuple[int, int]:
                 min_i = i
                 min_val = s
             else:
-                if s.time < min_val.time:
+                if s.full_time() < min_val.full_time():
                     min_i = i
                     min_val = s
 
@@ -99,7 +99,7 @@ def grouped(
     solves should be sorted/ordered prior to doing a grouping
     """
     # error checking
-    if operation in ["average", "mean"]:
+    if operation == "average" or operation == "mean":
         if count is None:
             count = len(solves)
         else:
@@ -135,7 +135,7 @@ def grouped(
             return Grouping(
                 solve_count=count,
                 state=State.SOLVED,
-                result=mean([s.time for s in solves]),
+                result=mean([s.full_time() for s in solves]),
                 solves=solves,
                 operation=operation,
             )
@@ -154,14 +154,20 @@ def grouped(
                 solve_count=count,
                 state=State.SOLVED,
                 result=mean(
-                    [s.time for i, s in enumerate(solves) if i not in {min_i, max_i}]
+                    [
+                        s.full_time()
+                        for i, s in enumerate(solves)
+                        if i not in {min_i, max_i}
+                    ]
                 ),
                 operation=operation,
                 solves=solves,
             )
     elif operation == "global_mean":
         try:
-            global_mean = mean([s.time for s in solves if s.state == State.SOLVED])
+            global_mean = mean(
+                [s.full_time() for s in solves if s.state == State.SOLVED]
+            )
         except StatisticsError as e:
             return ValueError(str(e) + " - received no valid solves as input")
 
@@ -196,7 +202,7 @@ def run_operations(
     return res
 
 
-def find_best(
+def find_best_group(
     solves: List[Solve], operation: Operation, counts: List[int]
 ) -> Dict[int, Grouping]:
     res: Dict[int, Grouping] = {}
@@ -212,3 +218,15 @@ def find_best(
                     elif gr.result < res[c].result:
                         res[c] = gr
     return res
+
+
+def find_best(solves: List[Solve]) -> Solve:
+    if len(solves) == 0:
+        raise ValueError("Tried to find best solve on empty list")
+    best = solves[0]
+    for s in solves[1:]:
+        if best.state == State.DNF and s.state == State.SOLVED:
+            best = s
+        if s.full_time() < best.full_time():
+            best = s
+    return best

@@ -1,7 +1,7 @@
 from typing import Union, List, NamedTuple, Literal, Tuple
 
 from .average_parser import parse_operation_code
-from .group_operations import grouped
+from .group_operations import grouped, find_best
 from .error import unwrap
 from .models import Operation, Solve
 
@@ -24,7 +24,7 @@ class Limit(NamedTuple):
     count_: int
 
 
-Commands = Literal["dump"]
+Commands = Literal["dump", "best"]
 
 QueryPart = Union[Filter, Average, Commands, Drop, Limit]
 
@@ -60,8 +60,8 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
         except ValueError:
             pass
 
-        if token.lower() in {"dump"}:
-            parsed.append("dump")
+        if token.lower() in {"dump", "best"}:
+            parsed.append(token.lower())
         elif token.lower().startswith("drop:"):
             parsed.append(Drop(int(token.split("drop:", maxsplit=1)[-1])))
         elif token.lower().startswith("limit:"):
@@ -94,8 +94,11 @@ def run_query(solves: List[Solve], *, query: Query) -> QueryRet:
         elif isinstance(qr, Limit):
             solves = solves[: qr.count_]
         else:
-            assert qr == "dump", str(qr)
-            returns.append("\n".join([s.describe() for s in solves]))
+            if qr == "best":
+                returns.append(find_best(solves).describe())
+            else:
+                assert qr == "dump", str(qr)
+                returns.append("\n".join([s.describe() for s in solves]))
 
     if len(returns) == 0:
         return solves

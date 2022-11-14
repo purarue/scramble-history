@@ -8,12 +8,11 @@ import json
 import warnings
 from pprint import pprint
 from pathlib import Path
-from typing import NamedTuple, Optional, Any, Dict, List, Iterator
+from typing import NamedTuple, Optional, Any, Dict, List, Iterator, TYPE_CHECKING
 
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import FuzzyWordCompleter
-from prompt_toolkit.document import Document
-from prompt_toolkit.validation import Validator, ValidationError
+if TYPE_CHECKING:
+    from prompt_toolkit.completion import FuzzyWordCompleter
+
 
 from .models import Solve
 
@@ -38,21 +37,6 @@ class SourceMap(NamedTuple):
     transformed_puzzle: str
     transformed_event_code: str
     transformed_event_description: str
-
-
-class HasattrValidator(Validator):
-    def __init__(self, check_obj: Any) -> None:
-        super().__init__()
-        self.check_obj = check_obj
-
-    def validate(self, document: Document) -> None:
-        text = document.text
-
-        for key in text.strip().split():
-            if not hasattr(self.check_obj, key):
-                raise ValidationError(
-                    message=f"Could not find key {key} on {self.check_obj}"
-                )
 
 
 class SourceMerger:
@@ -80,6 +64,26 @@ class SourceMerger:
 
     @classmethod
     def _select_keys(cls, data: Any) -> List[str]:
+
+        # define inline so this is only imported when its needed to add new solves
+        from prompt_toolkit import prompt
+        from prompt_toolkit.document import Document
+        from prompt_toolkit.validation import Validator, ValidationError
+
+        class HasattrValidator(Validator):
+            def __init__(self, check_obj: Any) -> None:
+                super().__init__()
+                self.check_obj = check_obj
+
+            def validate(self, document: Document) -> None:
+                text = document.text
+
+                for key in text.strip().split():
+                    if not hasattr(self.check_obj, key):
+                        raise ValidationError(
+                            message=f"Could not find key {key} on {self.check_obj}"
+                        )
+
         validator = HasattrValidator(data)
         text = prompt(
             "Which keys (e.g. puzzle, name) should be used to identify solves like this\nIf needed, enter multiple keys, separated by spaces, e.g. 'scramble_code name': ",
@@ -89,13 +93,15 @@ class SourceMerger:
 
     def _create_validator(
         self, key: str, defaults: Dict[str, Any]
-    ) -> FuzzyWordCompleter:
+    ) -> 'FuzzyWordCompleter':
         tokens = [getattr(s, key) for s in self.sourcemap]
         if defaults.get(key):
             tokens.append(defaults[key])
         return FuzzyWordCompleter(list(set(tokens)))
 
     def prompt_for_transform(self, data: Any) -> SourceMap:
+        from prompt_toolkit import prompt
+
         pprint(data)
         keys = self._select_keys(data)
         source_fields_match = {k: getattr(data, k) for k in keys}
@@ -149,6 +155,8 @@ class SourceMerger:
     def transform(self, solve: Any, sourcemap: Optional[SourceMap] = None) -> Solve:
         if sourcemap is None:
             sourcemap = self.match_or_prompt(solve)
+        # each source (cstimer or twistytimer) returns a dict
+        # which has the rest of the info for each solve
         transformed_data = solve._transform_map()
         return Solve(
             puzzle=sourcemap.transformed_puzzle,

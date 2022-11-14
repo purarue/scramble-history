@@ -320,7 +320,7 @@ def merge(
         header = f"Use {click.style('res', fg='green')} to review"
         IPython.embed(header=header)
     else:
-        from .group_operations import run_operations, grouped, find_best, operation_code
+        from .group_operations import run_operations, grouped, find_best_group, operation_code, find_best
         from .timeformat import format_decimal
         from tabulate import tabulate
 
@@ -335,12 +335,13 @@ def merge(
                 if isinstance(recent_ao5, Exception)
                 else recent_ao5.describe_average()
             )
+            click.echo(f"Best => {find_best(group_solves).describe()}")
             click.echo(f"Most recent Ao5 => {desc}")
             click.echo(f"Solve Count => {len(group_solves)}")
             stat_data = run_operations(
                 group_solves, operation="average", counts=[5, 12, 50, 100]
             )
-            best = find_best(group_solves, operation="average", counts=[5, 12, 50, 100])
+            best = find_best_group(group_solves, operation="average", counts=[5, 12, 50, 100])
             click.echo()
             click.echo(
                 tabulate(
