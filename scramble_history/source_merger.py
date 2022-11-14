@@ -5,9 +5,7 @@ to a shared categorization system
 """
 
 import json
-import pprint
-from decimal import Decimal
-from datetime import datetime
+from pprint import pprint
 from pathlib import Path
 from typing import NamedTuple, Optional, Any, Dict, List
 
@@ -16,32 +14,7 @@ from prompt_toolkit.completion import FuzzyWordCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.validation import Validator, ValidationError
 
-from .state import State
-
-
-class Solve(NamedTuple):
-    # cstimer: scramble code/manual edit
-    # twistytimer: puzzle
-    # e.g. 333, 444, 222, pyra, skewb, megaminx
-    puzzle: str
-
-    # cstimer scramble code
-    # twistytimer category/manually edit
-    # What this is: e.g. OH, BLD, LSE, F2L
-    event_code: str
-
-    # cstimer CSTimerScramble.name
-    # twistytimer category/manually edit
-    event_description: str
-
-    # if the cube is solved or not
-    state: State
-    # standard user-facing stuff here
-    scramble: str
-    comment: Optional[str]
-    time: Decimal
-    penalty: Decimal
-    when: datetime
+from .solve import Solve
 
 
 class SourceMap(NamedTuple):
