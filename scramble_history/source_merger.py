@@ -95,7 +95,7 @@ class SourceMerger:
         return FuzzyWordCompleter(list(set(tokens)))
 
     def prompt_for_transform(self, data: Any) -> SourceMap:
-        pprint.pprint(data)
+        pprint(data)
         keys = self._select_keys(data)
         source_fields_match = {k: getattr(data, k) for k in keys}
 
