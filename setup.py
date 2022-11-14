@@ -7,7 +7,7 @@ reqs = Path("requirements.txt").read_text().strip().splitlines()
 pkg = "scramble_history"
 setup(
     name=pkg,
-    version="0.1.5",
+    version="0.1.6",
     url="https://github.com/seanbreckenridge/scramble-history",
     author="Sean Breckenridge",
     author_email="seanbrecke@gmail.com",
