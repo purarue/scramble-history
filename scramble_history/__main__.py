@@ -335,6 +335,7 @@ def merge(
             find_best_group,
             operation_code,
             find_best,
+            find_worst,
         )
         from .timeformat import format_decimal
         from tabulate import tabulate
@@ -358,6 +359,7 @@ def merge(
                 else recent_ao5.describe_average()
             )
             click.echo(f"Best => {find_best(group_solves).describe()}")
+            click.echo(f"Worst => {find_worst(group_solves).describe()}")
             click.echo(f"Most recent Ao5 => {desc}")
             click.echo(f"Solve Count => {len(group_solves)}")
             stat_data = run_operations(

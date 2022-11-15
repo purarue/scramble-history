@@ -218,3 +218,10 @@ def find_best(solves: List[Solve]) -> Solve:
         raise ValueError("Tried to find best solve on empty list")
     min_i = min(list(enumerate(solves_to_float(solves))), key=lambda o: o[1])[0]
     return solves[min_i]
+
+
+def find_worst(solves: List[Solve]) -> Solve:
+    if len(solves) == 0:
+        raise ValueError("Tried to find worst solve on empty list")
+    max_i = max(list(enumerate(solves_to_float(solves))), key=lambda o: o[1])[0]
+    return solves[max_i]
