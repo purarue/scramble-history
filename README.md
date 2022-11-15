@@ -90,7 +90,7 @@ Options:
   -g, --group-by [puzzle|event_code|event_description]
                                   Group parsed results by key
   -G, --graph                     graph grouped results
-  --graph-opt [show|save|date-axis|kitty-print]
+  -O, --graph-opt [show|save|date-axis|kitty-print|annotate|annotate-average]
                                   graph options
   -q, --query TEXT                Solves to filter to, or actions to run
   -s, --sort-by [when]            Sort the resulting solves
@@ -253,9 +253,9 @@ Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.69
 
 ### graphs
 
-Note: this requires `seaborn`, install with `python3 -m pip install 'scramble-history[optional]'`
+Note: this requires `seaborn`, install with `pip install 'scramble-history[optional]'`
 
-For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around etc.
+For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around etc, and graphs in reverse-chronological order (provide `--no-reverse` to swap)
 
 To save, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
 
@@ -263,9 +263,15 @@ To save, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/ki
 
 Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
 
-`python3 -m scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --no-reverse --graph-opt kitty-print`
+`scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --no-reverse --graph-opt kitty-print`
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
+
+Can provide the `annotate` options if you want to add some of the text onto the graph:
+
+`scramble_history merge -q 'event_description==4x4' -q 'first:5' -G --graph-opt annotate --graph-opt annotate-average`
+
+<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/annotated.png?raw=true" height=300>
 
 ### merge query commands:
 

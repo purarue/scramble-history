@@ -256,10 +256,13 @@ def _print_kitty_images(imgs: List[str]) -> bool:
     "-G", "--graph", is_flag=True, help="graph grouped results", default=False
 )
 @click.option(
+    "-O",
     "--graph-opt",
     default=(),
     multiple=True,
-    type=click.Choice(["show", "save", "date-axis", "kitty-print"]),
+    type=click.Choice(
+        ["show", "save", "date-axis", "kitty-print", "annotate", "annotate-average"]
+    ),
     help="graph options",
 )
 @click.option(
@@ -337,6 +340,7 @@ def merge(
 
     if graph and action != "stats":
         action = "stats"
+
     res: Any = solves
     if (group_by is not None or action == "stats" or graph) and isinstance(res, list):
         if group_by is None:
@@ -395,8 +399,10 @@ def merge(
                 if isinstance(recent_ao5, Exception)
                 else recent_ao5.describe_average()
             )
-            click.echo(f"Best => {find_best(group_solves).describe()}")
-            click.echo(f"Worst => {find_worst(group_solves).describe()}")
+            best_solve = find_best(group_solves).describe()
+            worst_solve = find_worst(group_solves).describe()
+            click.echo(f"Best => {best_solve}")
+            click.echo(f"Worst => {worst_solve}")
             click.echo(f"Most recent Ao5 => {desc}")
             click.echo(f"Solve Count => {len(group_solves)}")
             stat_data = run_operations(
@@ -428,6 +434,13 @@ def merge(
 
                 from dataclasses import asdict
                 from .models import State
+                from .error import unwrap
+
+                text = ""
+                if "annotate" in graph_opt:
+                    text += f"Best: {best_solve}\n"
+                    text += f"Worst: {worst_solve}\n"
+                    text += f"Count: {len(group_solves)}\n"
 
                 pd_input = pd.json_normalize(
                     list(
@@ -451,11 +464,31 @@ def merge(
                 )
                 plt.xlabel("solve date" if "date-axis" in graph_opt else "solve #")
                 plt.ylabel("solve time")
+                textbox_props = dict(boxstyle="round", facecolor="lightblue", alpha=0.5)
+                if "annotate" in graph_opt:
+                    plt.annotate(
+                        text.strip(),
+                        xy=(0.05, 0.95),
+                        xycoords="axes fraction",
+                        fontsize=14,
+                        verticalalignment="top",
+                        bbox=textbox_props,
+                        color="black",
+                        horizontalalignment="left",
+                    )
+                if "annotate-average" in graph_opt:
+                    average = unwrap(grouped(solves, operation="average")).describe()
+                    plt.annotate(
+                        average,
+                        xy=(0.05, 0.05),
+                        xycoords="axes fraction",
+                        fontsize=10,
+                        verticalalignment="bottom",
+                        bbox=textbox_props,
+                        color="black",
+                        horizontalalignment="left",
+                    )
                 plt.title(group_name)
-                if "show" in graph_opt and (
-                    "save" not in graph_opt and "kitty-print" not in graph_opt
-                ):
-                    plt.show()
                 if "kitty-print" in graph_opt or "save" in graph_opt:
                     # print using icat for the kitty terminal
                     if "save" in graph_opt:
@@ -466,6 +499,8 @@ def merge(
                             target = os.path.join(td, filename)
                             plt.savefig(target, format="png")
                             _print_kitty_images([target])
+                else:
+                    plt.show()
                 plt.clf()
                 plt.cla()
                 plt.close()
