@@ -156,49 +156,40 @@ $ scramble_history merge -g event_description -a json
 It can also calculate running averages across your merged data:
 
 ```
-===================
-2x2
-===================
-Best => 3.121
-Most recent Ao5 => 7.734 = 10.302 (12.850) (5.570) 5.680 7.220
-Solve Count => 298
-
-2x2      Current    Best
------  ---------  ------
-Ao5        7.734   5.58
-Ao12       8.625   6.252
-Ao50       7.614   7.214
-Ao100      7.653   7.567
-===================
-3x3 2-GEN <RU>
-===================
-Best => 5.490
-Most recent Ao5 => 15.053 = (18.600) 12.560 17.550 15.050 (12.440)
-Solve Count => 99
-
-3x3 2-GEN <RU>    Current    Best
-----------------  ---------  ------
-Ao5               15.053     9.177
-Ao12              12.619     10.464
-Ao50              12.314     11.794
-Ao100             --         --
+$ scramble_history merge -a stats
 ===================
 3x3 CFOP
 ===================
 Best => 11.880
-Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
-Solve Count => 834
+Worst => DNF
+Most recent Ao5 => 19.153 = 20.010 (21.470) 18.320 19.130 (18.000)
+Solve Count => 839
 
 3x3 CFOP    Current      Best
 ----------  ---------  ------
-Ao5         19.847     14.647
-Ao12        19.115     16.898
-Ao50        18.603     18.092
+Ao5         19.153     14.647
+Ao12        19.132     16.898
+Ao50        18.612     18.092
 Ao100       DNF        18.444
+===================
+2x2
+===================
+Best => 3.121
+Worst => DNF
+Most recent Ao5 => 8.927 = 8.664 7.816 (6.469) 10.302 (12.850)
+Solve Count => 311
+
+2x2      Current    Best
+-----  ---------  ------
+Ao5        8.927   5.58
+Ao12       7.321   6.252
+Ao50       7.598   7.214
+Ao100      7.554   7.427
 ===================
 3x3 CFOP OH
 ===================
 Best => 19.890
+Worst => 1:32.280
 Most recent Ao5 => 29.327 = 29.800 (34.950) 27.750 (26.710) 30.430
 Solve Count => 112
 
@@ -208,22 +199,9 @@ Ao5               29.327  26.61
 Ao12              29.879  29.697
 Ao50              32.892  32.285
 Ao100             33.766  33.766
-===================
-4x4
-===================
-Best => 1:28.730
-Most recent Ao5 => 2:02.020 = 2:02.460 (1:28.730) 2:03.640 (2:17.320) 1:59.960
-Solve Count => 71
-
-4x4    Current    Best
------  ---------  --------
-Ao5    2:02.020   2:02.020
-Ao12   2:26.406   2:26.406
-Ao50   2:40.224   2:40.224
-Ao100  --         --
 ```
 
-You can also specifically filter to a solve type with `--query`:
+You can specifically filter to a solve type with `--query`:
 
 ```
 $ scramble_history merge --query 'event_description==3x3 CFOP' -a stats
@@ -257,7 +235,7 @@ Note: this requires `seaborn`, install with `pip install 'scramble-history[optio
 
 For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around etc, and graphs in reverse-chronological order (provide `--no-reverse` to swap)
 
-To save, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
+To save to a png, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/kitty.png?raw=true" height=500>
 
@@ -291,7 +269,9 @@ Examples:
 
 - `'event_description==3x3 CFOP'`
 - `'puzzle==skewb'`
-- `'puzzle==skewb'`
+- `'puzzle==222'`
+
+What the description/puzzle names are depend on what you set them as while merging
 
 #### drop/limit
 
@@ -338,7 +318,7 @@ $ scramble_history merge -q 'puzzle==222' -q best
 
 ### first/head tail/last
 
-Pretty similar to `drop`/`first`, these let you take the first or last `n` items, like `limit`. Remember that by default your newest solves are at the front of the list (you can swap this with `--no-reverse`), so to get your most recent `Ao5`:
+These let you take the first or last `n` items, like `limit`. Remember that by default your newest solves are at the front of the list (you can swap this with `--no-reverse`), so to get your most recent `Ao5`:
 
 ```bash
 $ scramble_history merge -q 'event_description==4x4' -q 'first:5' -q ao5
