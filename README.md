@@ -62,6 +62,8 @@ $ scramble_history parse twistytimer --json Backup_2022-10-17_20-19.txt | jq '.[
 }
 ```
 
+Note: for `cubers.io`, the 'when' (datetime when you did the solve) is the same for every solve in a competition (in other words, when the competition began)
+
 ## merge
 
 ```
