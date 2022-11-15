@@ -2,6 +2,8 @@
 
 Parses your rubiks cube scramble history from [cstimer.net](https://cstimer.net/), [cubers.io](https://www.cubers.io/), [twistytimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US)
 
+If theres some other format you'd like to use, feel free to [open an issue](https://github.com/seanbreckenridge/scramble-history/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
+
 .. and combines/merges solves from those sources into a single format, allowing you to do statistics/giving you uniform averages/a full history
 
 ## Installation
