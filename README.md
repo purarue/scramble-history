@@ -1,6 +1,8 @@
 # scramble-history
 
-parses your rubiks cube scramble history from [cstimer.net](https://cstimer.net/), [cubers.io](https://www.cubers.io/), [twistytimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US) and the [WCA TSV export](https://www.worldcubeassociation.org/results/misc/export.html)
+Parses your rubiks cube scramble history from [cstimer.net](https://cstimer.net/), [cubers.io](https://www.cubers.io/), [twistytimer](https://play.google.com/store/apps/details?id=com.aricneto.twistytimer&hl=en_US&gl=US)
+
+.. and combines/merges solves from those sources into a single format, allowing you to do statistics/giving you uniform averages/a full history
 
 ## Installation
 

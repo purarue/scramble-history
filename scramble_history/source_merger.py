@@ -191,7 +191,6 @@ from .config import KNOWN_PARSERS, ConfigPaths
 
 
 def merge(sourcemap_file: Path, conf: ConfigPaths) -> Iterator[Solve]:
-    from .source_merger import SourceMerger
     from .cstimer import parse_files as cstimer_merge
     from .twistytimer import parse_files as twistytimer_merge
 

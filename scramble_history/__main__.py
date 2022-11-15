@@ -199,7 +199,8 @@ def banner() -> None:
         ignore_unknown_options=True,
         allow_extra_args=True,
         max_content_width=110,
-    )
+    ),
+    short_help="merge solves together"
 )
 @click.option(
     "-s",
@@ -272,6 +273,12 @@ def merge(
 ) -> None:
     """
     merge solves from different data sources together
+
+    To provide input, either define a config file, or pass paths like:
+
+    \b
+    --cstimer ~/Downloads/cstimer.json
+    --twistytimer ~/Downloads/*twistytimer*.txt
     """
     from .source_merger import merge as merge_solves
 
