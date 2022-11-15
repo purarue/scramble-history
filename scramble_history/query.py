@@ -74,7 +74,7 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
             continue
         if "?=" in token:
             solve_attr, json_list = token.split("?=", maxsplit=1)
-            err = f"""?= should be used with a JSON list on the right hand side, e.g. 'event_description=?["4x4", "2x2"]'"""
+            err = """?= should be used with a JSON list on the right hand side, e.g. 'event_description=?["4x4", "2x2"]'"""
             try:
                 data = json.loads(json_list)
             except json.JSONDecodeError as e:
