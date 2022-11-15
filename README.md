@@ -12,7 +12,7 @@ To install with pip, run:
 
     pip install scramble_history
 
-To install JSON support: `pip install scramble_history[optional]`
+To install JSON/graph support: `pip install scramble_history[optional]`
 
 ## Input Formats
 
