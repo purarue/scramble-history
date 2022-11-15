@@ -273,6 +273,24 @@ Examples:
 
 What the description/puzzle names are depend on what you set them as while merging
 
+#### filterin
+
+If you want to match one of many items, e.g. filter just down to `3x3` and `2x2` solves, use `?=`:
+
+```
+scramble_history merge -q 'event_description?=["3x3 CFOP", "2x2"]' -a stats
+```
+
+Note: The right side of `?=` is JSON
+
+To quickly review my own stats, I have a shell function like:
+
+```bash
+cube-stats() {
+	scramble_history merge -q 'event_description?=["3x3 CFOP", "3x3 CFOP OH", "2x2", "4x4"]' -a stats -g event_description "$@"
+}
+```
+
 #### drop/limit
 
 `drop:n` or `limit:n` where `n` is a number. This can be used in between commands to update the current solve list.

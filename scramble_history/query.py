@@ -1,4 +1,5 @@
-from typing import Union, List, NamedTuple, Literal, Tuple
+import json
+from typing import Union, List, NamedTuple, Literal, Tuple, Set
 
 import more_itertools
 
@@ -11,6 +12,11 @@ from .models import Operation, Solve
 class Filter(NamedTuple):
     attr: str
     value: str
+
+
+class FilterIn(NamedTuple):
+    attr: str
+    values: Set[str]
 
 
 class Average(NamedTuple):
@@ -36,7 +42,7 @@ class Tail(NamedTuple):
 
 Commands = Literal["dump", "best"]
 
-QueryPart = Union[Filter, Average, Commands, Drop, Limit, Head, Tail]
+QueryPart = Union[Filter, FilterIn, Average, Commands, Drop, Limit, Head, Tail]
 
 Query = List[QueryPart]
 
@@ -65,6 +71,16 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
         if "==" in token:
             solve_attr, value = token.split("==", maxsplit=1)
             parsed.append(Filter(solve_attr, value))
+            continue
+        if "?=" in token:
+            solve_attr, json_list = token.split("?=", maxsplit=1)
+            err = f"""?= should be used with a JSON list on the right hand side, e.g. 'event_description=?["4x4", "2x2"]'"""
+            try:
+                data = json.loads(json_list)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"{err}: {str(e)}")
+            assert isinstance(data, list), err
+            parsed.append(FilterIn(solve_attr, set(data)))
             continue
 
         try:
@@ -99,13 +115,16 @@ QueryRet = Union[Tuple[str, ...], List[Solve]]
 def run_query(solves: List[Solve], *, query: Query) -> QueryRet:
     returns: List[str] = []
     for qr in query:
-        if isinstance(qr, Filter):
+        if isinstance(qr, (Filter, FilterIn)):
             if len(solves) == 0:
                 continue
             assert hasattr(
                 solves[0], qr.attr
             ), f"could not find attribute {qr} on {solves[0]}"
-            solves = list(filter(lambda solv: getattr(solv, qr.attr) == qr.value, solves))  # type: ignore[arg-type]
+            if isinstance(qr, Filter):
+                solves = list(filter(lambda solv: getattr(solv, qr.attr) == qr.value, solves))  # type: ignore[arg-type]
+            else:
+                solves = list(filter(lambda solv: getattr(solv, qr.attr) in qr.values, solves))  # type: ignore[arg-type]
         elif isinstance(qr, Average):
             g = unwrap(grouped(solves, operation=qr.operation, count=qr.count_))
             returns.append(g.describe())
