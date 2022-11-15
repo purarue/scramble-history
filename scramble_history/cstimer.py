@@ -160,5 +160,8 @@ def _parse_scramble(raw: RawScramble) -> Optional[SessionSolve]:
         return None
 
 
-def parse_files(paths: List[Path]) -> Iterator[Solve]:
-    yield from unique_everseen(chain(*(denormalize(parse_file(p)) for p in paths)))
+def merge_files(paths: List[Path]) -> Iterator[Solve]:
+    yield from unique_everseen(
+        chain(*(denormalize(parse_file(p)) for p in paths)),
+        key=lambda s: (s.solve_time + s.penalty, s.when),
+    )

@@ -99,5 +99,8 @@ def parse_file(path: Path) -> Iterator[Solve]:
             )
 
 
-def parse_files(paths: List[Path]) -> Iterator[Solve]:
-    yield from unique_everseen(chain(*(parse_file(p) for p in paths)))
+def merge_files(paths: List[Path]) -> Iterator[Solve]:
+    yield from unique_everseen(
+        chain(*(parse_file(p) for p in paths)),
+        key=lambda s: (s.time + s.penalty, s.when),
+    )
