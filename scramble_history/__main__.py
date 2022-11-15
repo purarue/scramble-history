@@ -200,7 +200,7 @@ def banner() -> None:
         allow_extra_args=True,
         max_content_width=110,
     ),
-    short_help="merge solves together"
+    short_help="merge solves together",
 )
 @click.option(
     "-s",
@@ -339,7 +339,14 @@ def merge(
         from .timeformat import format_decimal
         from tabulate import tabulate
 
-        for group_name, group_solves in res.items():
+        # order by number of solves in the group
+        by_solve_count = sorted(
+            [(gn, len(gs)) for gn, gs in res.items()],
+            key=lambda k: k[1],
+            reverse=True,
+        )
+        for group_name, _ in by_solve_count:
+            group_solves = res[group_name]
             group_solves.sort(key=lambda s: s.when, reverse=reverse)
             banner()
             click.echo(group_name)
