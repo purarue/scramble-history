@@ -1,5 +1,7 @@
 from typing import Union, List, NamedTuple, Literal, Tuple
 
+import more_itertools
+
 from .average_parser import parse_operation_code
 from .group_operations import grouped, find_best
 from .error import unwrap
@@ -24,11 +26,23 @@ class Limit(NamedTuple):
     count_: int
 
 
+class Head(NamedTuple):
+    count_: int
+
+
+class Tail(NamedTuple):
+    count_: int
+
+
 Commands = Literal["dump", "best"]
 
-QueryPart = Union[Filter, Average, Commands, Drop, Limit]
+QueryPart = Union[Filter, Average, Commands, Drop, Limit, Head, Tail]
 
 Query = List[QueryPart]
+
+
+def _parse_colon_cmd(text: str) -> int:
+    return int(text.split(":", maxsplit=1)[-1])
 
 
 def parse_query(inputs: Union[str, List[str]]) -> Query:
@@ -60,15 +74,19 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
         except ValueError:
             pass
 
-        if token.lower() == "dump":
+        tl = token.lower()
+        if tl == "dump":
             parsed.append("dump")
-        elif token.lower() == "best":
+        elif tl == "best":
             parsed.append("best")
-        elif token.lower().startswith("drop:"):
-            parsed.append(Drop(int(token.split("drop:", maxsplit=1)[-1])))
-        elif token.lower().startswith("limit:"):
-            parsed.append(Limit(int(token.split("limit:", maxsplit=1)[-1])))
-
+        elif tl.startswith("drop:"):
+            parsed.append(Drop(_parse_colon_cmd(token)))
+        elif tl.startswith("limit:"):
+            parsed.append(Limit(_parse_colon_cmd(token)))
+        elif tl.startswith("head:") or tl.startswith("first:"):
+            parsed.append(Head(_parse_colon_cmd(token)))
+        elif tl.startswith("tail:") or tl.startswith("last:"):
+            parsed.append(Tail(_parse_colon_cmd(token)))
         else:
             raise ValueError(f"Query: not sure how to parse token '{token}'")
 
@@ -95,6 +113,10 @@ def run_query(solves: List[Solve], *, query: Query) -> QueryRet:
             solves = solves[qr.count_ :]
         elif isinstance(qr, Limit):
             solves = solves[: qr.count_]
+        elif isinstance(qr, Head):
+            solves = more_itertools.take(qr.count_, solves)
+        elif isinstance(qr, Tail):
+            solves = list(more_itertools.tail(qr.count_, solves))
         else:
             if qr == "best":
                 returns.append(find_best(solves).describe())

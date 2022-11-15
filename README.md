@@ -330,6 +330,15 @@ $ scramble_history merge -q 'puzzle==222' -q best
 3.121
 ```
 
+### first/head tail/last
+
+Pretty similar to `drop`/`first`, these let you take the first or last `n` items, like `limit`. Remember that by default your newest solves are at the front of the list (you can swap this with `--no-reverse`), so to get your most recent `Ao5`:
+
+```bash
+$ scramble_history merge -q 'event_description==4x4' -q 'first:5' -q ao5
+Ao5: 1:44.160 = 1:49.547 1:45.144 1:37.790 (1:52.195) (1:32.934)
+```
+
 #### compute averages
 
 `Aon` or `Mon`, where 'n' is a number. Examples: `Ao5`, `Ao500`, `Mo10`
