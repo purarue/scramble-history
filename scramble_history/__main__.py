@@ -1,7 +1,13 @@
+import sys
 import os
+import re
 import itertools
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any, List, Dict, Sequence, Optional
+from datetime import datetime
 from decimal import Decimal
 
 import click
@@ -194,6 +200,20 @@ def banner() -> None:
     click.echo("===================")
 
 
+KITTY_PATH = shutil.which("kitty")
+
+
+def _print_kitty_images(imgs: List[str]) -> bool:
+    if os.environ.get("TERM") != "xterm-kitty":
+        return False
+    printed = False
+    assert KITTY_PATH is not None, "could not find kitty on your path"
+    for img in imgs:
+        subprocess.run([KITTY_PATH, "icat", "--align=left", str(img)])
+        printed = True
+    return printed
+
+
 @main.command(
     context_settings=dict(
         ignore_unknown_options=True,
@@ -233,6 +253,16 @@ def banner() -> None:
     default=None,
 )
 @click.option(
+    "-G", "--graph", is_flag=True, help="graph grouped results", default=False
+)
+@click.option(
+    "--graph-opt",
+    default=(),
+    multiple=True,
+    type=click.Choice(["show", "save", "date-axis", "kitty-print"]),
+    help="graph options",
+)
+@click.option(
     "-q",
     "--query",
     type=click.UNPROCESSED,
@@ -264,6 +294,8 @@ def banner() -> None:
 def merge(
     sourcemap_file: Path,
     action: str,
+    graph: bool,
+    graph_opt: Sequence[str],
     check: bool,
     sort_by: Optional[str],
     reverse: bool,
@@ -303,8 +335,10 @@ def merge(
             # we just filtered, so set the solves to what the query returned
             solves = data
 
+    if graph and action != "stats":
+        action = "stats"
     res: Any = solves
-    if group_by is not None or action == "stats" and isinstance(res, list):
+    if (group_by is not None or action == "stats" or graph) and isinstance(res, list):
         if group_by is None:
             click.echo(
                 "Passed 'stats' with no '--group_by', grouping by 'event_description'",
@@ -312,6 +346,9 @@ def merge(
             )
             group_by = "event_description"
         key = str(group_by)
+        if len(solves) == 0:
+            click.echo("Solve list is empty!", err=True)
+            sys.exit(1)
         assert hasattr(
             solves[0], key
         ), f"Error: could not find attribute {key} on {solves[0]}"
@@ -384,6 +421,54 @@ def merge(
                     headers=(group_name, "Current", "Best"),
                 )
             )
+            if graph:
+                import seaborn as sns  # type: ignore[import]
+                import matplotlib.pyplot as plt  # type: ignore[import]
+                import pandas as pd  # type: ignore[import]
+
+                from dataclasses import asdict
+                from .models import State
+
+                pd_input = pd.json_normalize(
+                    list(
+                        dict(list(asdict(solve).items()) + list({"solve": i}.items()))
+                        for i, solve in enumerate(group_solves)
+                        if solve.state == State.SOLVED
+                    )
+                )
+
+                filename = re.sub(
+                    r"[\?:\s\/\\]",
+                    r"_",
+                    f"{group_name}-{len(group_solves)}-{datetime.now().replace(microsecond=0)}.png",
+                )
+                _, ax = plt.subplots()
+                sns.lineplot(
+                    pd_input,
+                    x="when" if "date-axis" in graph_opt else "solve",
+                    y="full_time",
+                    ax=ax,
+                )
+                plt.xlabel("solve date" if "date-axis" in graph_opt else "solve #")
+                plt.ylabel("solve time")
+                plt.title(group_name)
+                if "show" in graph_opt and (
+                    "save" not in graph_opt and "kitty-print" not in graph_opt
+                ):
+                    plt.show()
+                if "kitty-print" in graph_opt or "save" in graph_opt:
+                    # print using icat for the kitty terminal
+                    if "save" in graph_opt:
+                        click.echo(f"Saving to {filename}", err=True)
+                        plt.savefig(filename, format="png")
+                    else:
+                        with tempfile.TemporaryDirectory() as td:
+                            target = os.path.join(td, filename)
+                            plt.savefig(target, format="png")
+                            _print_kitty_images([target])
+                plt.clf()
+                plt.cla()
+                plt.close()
 
 
 if __name__ == "__main__":

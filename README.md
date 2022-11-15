@@ -75,6 +75,11 @@ Usage: scramble_history merge [OPTIONS] [DATAFILES]
 
   merge solves from different data sources together
 
+  To provide input, either define a config file, or pass paths like:
+
+  --cstimer ~/Downloads/cstimer.json
+  --twistytimer ~/Downloads/*twistytimer*.txt
+
 Options:
   -s, --sourcemap-file FILE       Data file which saves choices on how to map solves from different sources
                                   [default: /home/sean/.config/scramble_history_sourcemap.json]
@@ -82,6 +87,9 @@ Options:
   -C, --check                     Dont print/interact, just check that all solves are transformed properly
   -g, --group-by [puzzle|event_code|event_description]
                                   Group parsed results by key
+  -G, --graph                     graph grouped results
+  --graph-opt [show|save|date-axis|kitty-print]
+                                  graph options
   -q, --query TEXT                Solves to filter to, or actions to run
   -s, --sort-by [when]            Sort the resulting solves
   -r, --reverse / --no-reverse    Reverse the sort for --sort-by. --reverse is the default
@@ -240,6 +248,20 @@ Mo3: 21.413 = 25.969 22.220 16.050
 Ao5: 22.037 = (25.969) 22.220 (16.050) 22.697 21.193
 Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.697 21.107 16.538 19.144
 ```
+
+### graphs
+
+Note: this requires `seaborn`, install with `python3 -m pip install 'scramble-history[optional]'`
+
+For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around etc.
+
+To save, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
+
+<img src="https://i.imgur.com/q5i7pDD.png">
+
+Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
+
+`python3 -m scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --no-reverse --graph-opt kitty-print`
 
 ### merge query commands:
 

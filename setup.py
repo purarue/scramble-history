@@ -25,7 +25,7 @@ setup(
         "console_scripts": ["scramble_history = scramble_history.__main__:main"]
     },
     extras_require={
-        "optional": ["orjson"],
+        "optional": ["orjson", "seaborn"],
         "testing": [
             "pytest",
             "mypy",
