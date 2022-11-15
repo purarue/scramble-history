@@ -257,11 +257,14 @@ For each group selected by `--group-by`, this creates a graph. By default, this 
 
 To save, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
 
-<img src="https://i.imgur.com/q5i7pDD.png">
+
+<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/kitty.png?raw=true" height=500>
 
 Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
 
 `python3 -m scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --no-reverse --graph-opt kitty-print`
+
+<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
 
 ### merge query commands:
 
