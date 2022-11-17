@@ -158,12 +158,16 @@ def twistytimer(_json: bool, twistytimer_file: Path) -> None:
 
 
 config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
+scramble_history_config_dir = Path(
+    os.environ.get("SCRAMBLE_HISTORY_CONFIG_DIR", config_dir / "scramble_history")
+)
+if not scramble_history_config_dir.exists():
+    scramble_history_config_dir.mkdir(parents=True)
+
 
 # this needs to be a global path that user cant modify in click option
 # so _parse_merge_inputs can access it
-config_file = Path(
-    os.environ.get("SCRAMBLE_HISTORY_CONFIG", config_dir / "scramble_history.yaml")
-)
+config_file = scramble_history_config_dir / "files.yaml"
 
 
 def _parse_merge_inputs(
@@ -226,7 +230,7 @@ def _print_kitty_images(imgs: List[str]) -> bool:
     "-s",
     "--sourcemap-file",
     help="Data file which saves choices on how to map solves from different sources",
-    default=config_dir / "scramble_history_sourcemap.json",
+    default=scramble_history_config_dir / "sourcemap.json",
     show_default=True,
     type=click.Path(dir_okay=False, path_type=Path),
 )

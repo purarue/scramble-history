@@ -84,7 +84,7 @@ Usage: scramble_history merge [OPTIONS] [DATAFILES]
 
 Options:
   -s, --sourcemap-file FILE       Data file which saves choices on how to map solves from different sources
-                                  [default: /home/sean/.config/scramble_history_sourcemap.json]
+                                  [default: /home/sean/.config/scramble_history/sourcemap.json]
   -a, --action [json|repl|stats]  what to do with merged solves  [default: repl]
   -C, --check                     Dont print/interact, just check that all solves are transformed properly
   -g, --group-by [puzzle|event_code|event_description]
@@ -113,7 +113,7 @@ The merge command lets you combine solves from different sources into a normaliz
 }
 ```
 
-Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history_sourcemap.json`. As an example of the generated file, you can see mine [here](https://sean.fish/d/scramble_history_sourcemap.json?redirect)
+Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history/sourcemap.json`. As an example of the generated file, you can see mine [here](https://sean.fish/d/scramble_history/sourcemap.json?redirect)
 
 The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
 
@@ -123,7 +123,7 @@ scramble_history merge --action json \
     --twistytimer ~/data/cubing/phone_twistytimer/* ~/data/cubing/cubers_io/* ~/data/cubing/manual.csv
 ```
 
-You can also create a config file at `~/.config/scramble_history.yaml` (location can be changed with the `SCRAMBLE_HISTORY_CONFIG` environment variable) which contains similar info, so you don't have to type it out every time:
+You can also create a config file at `~/.config/scramble_history/files.yaml` (config directory location can be changed with the `SCRAMBLE_HISTORY_CONFIG_DIR` environment variable) which contains similar info, so you don't have to type it out every time:
 
 ```yaml
 cstimer:
