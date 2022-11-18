@@ -94,7 +94,8 @@ Options:
                                   graph options
   -q, --query TEXT                Solves to filter to, or actions to run
   -s, --sort-by [when]            Sort the resulting solves
-  -r, --reverse / --no-reverse    Reverse the sort for --sort-by. --reverse is the default
+  -r, --reverse / --no-reverse    Reverse the sort for --sort-by. Default is --no-reverse, stats uses
+                                  --reverse
   --help                          Show this message and exit.
 ```
 
@@ -156,68 +157,68 @@ $ scramble_history merge -g event_description -a json
 It can also calculate running averages across your merged data:
 
 ```
-$ scramble_history merge -a stats
+[ ~/Repos/scramble-history | master ] $ python3 -m scramble_history merge -a stats
+Passed 'stats' with no '--group_by', grouping by 'event_description'
 ===================
 3x3 CFOP
 ===================
 Best => 11.880
-Worst => DNF
-Most recent Ao5 => 19.153 = 20.010 (21.470) 18.320 19.130 (18.000)
-Solve Count => 839
+Worst => 48.049
+Most recent Ao5 => 17.436 = 16.551 17.682 (24.941) (16.531) 18.076
+Global Mean (841/847) => 19.681
+Solve Count => 847
 
 3x3 CFOP    Current      Best
 ----------  ---------  ------
-Ao5         19.153     14.647
-Ao12        19.132     16.898
-Ao50        18.612     18.092
+Ao5         17.436     14.647
+Ao12        18.605     16.898
+Ao50        18.725     18.092
 Ao100       DNF        18.444
 ===================
 2x2
 ===================
 Best => 3.121
-Worst => DNF
-Most recent Ao5 => 8.927 = 8.664 7.816 (6.469) 10.302 (12.850)
-Solve Count => 311
+Worst => 50.170
+Most recent Ao5 => 6.403 = (7.240) 6.480 6.250 (6.150) 6.480
+Global Mean (317/318) => 8.820
+Solve Count => 318
 
 2x2      Current    Best
 -----  ---------  ------
-Ao5        8.927   5.58
-Ao12       7.321   6.252
-Ao50       7.598   7.214
-Ao100      7.554   7.427
+Ao5        6.403   5.58
+Ao12       7.494   6.252
+Ao50       7.574   7.214
+Ao100      7.553   7.427
+===================
+4x4
+===================
+Best => 1:15.592
+Worst => 5:39.830
+Most recent Ao5 => 1:33.173 = (1:27.770) (1:41.280) 1:38.735 1:28.795 1:31.988
+Global Mean (129/129) => 2:25.470
+Solve Count => 129
+
+4x4    Current    Best
+-----  ---------  --------
+Ao5    1:33.173   1:33.173
+Ao12   1:36.256   1:36.256
+Ao50   1:51.013   1:51.013
+Ao100  2:09.471   2:09.471
 ===================
 3x3 CFOP OH
 ===================
 Best => 19.890
 Worst => 1:32.280
-Most recent Ao5 => 29.327 = 29.800 (34.950) 27.750 (26.710) 30.430
-Solve Count => 112
+Most recent Ao5 => 30.640 = 29.760 (26.800) 31.410 (32.450) 30.750
+Global Mean (117/117) => 36.919
+Solve Count => 117
 
 3x3 CFOP OH      Current    Best
 -------------  ---------  ------
-Ao5               29.327  26.61
-Ao12              29.879  29.697
-Ao50              32.892  32.285
-Ao100             33.766  33.766
-```
-
-You can specifically filter to a solve type with `--query`:
-
-```
-$ scramble_history merge --query 'event_description==3x3 CFOP' -a stats
-===================
-3x3 CFOP
-===================
-Best => 11.880
-Most recent Ao5 => 19.847 = 19.520 (16.040) 18.240 21.780 (23.980)
-Solve Count => 834
-
-3x3 CFOP    Current      Best
-----------  ---------  ------
-Ao5         19.847     14.647
-Ao12        19.115     16.898
-Ao50        18.603     18.092
-Ao100       DNF        18.444
+Ao5               30.64   26.61
+Ao12              29.123  29.123
+Ao50              32.776  32.285
+Ao100             32.923  32.923
 ```
 
 Or provide other commands to run instead of `--action stats`:
@@ -241,13 +242,13 @@ To save to a png, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoy
 
 Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
 
-`scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --graph-opt kitty-print`
+`scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 --no-reverse -g event_description -G --graph-opt kitty-print`
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
 
 Can provide the `annotate` options if you want to add some of the text onto the graph:
 
-`scramble_history merge -q 'event_description==4x4' -q 'first:5' -G --graph-opt annotate --graph-opt annotate-average`
+`scramble_history merge -q 'event_description==4x4' -q 'last:5' -G --no-reverse --graph-opt annotate --graph-opt annotate-average`
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/annotated.png?raw=true" height=300>
 
@@ -339,7 +340,7 @@ $ scramble_history merge -q 'puzzle==222' -q best
 These let you take the first or last `n` items, like `limit`. To get your most recent `Ao5`:
 
 ```bash
-$ scramble_history merge -q 'event_description==4x4' -q 'first:5' -q ao5
+$ scramble_history merge --no-reverse -q 'event_description==4x4' -q 'last:5' -q ao5
 Ao5: 1:44.160 = 1:49.547 1:45.144 1:37.790 (1:52.195) (1:32.934)
 ```
 

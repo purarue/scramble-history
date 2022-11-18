@@ -61,9 +61,10 @@ class Grouping(NamedTuple):
     def describe_average(self) -> str:
         # should always sort according to datetime,
         # first solve should appear first in the average
-        desc = [s.describe() for s in sorted(self.solves, key=lambda sl: sl.when)]
+        srt = sorted(self.solves, key=lambda sl: sl.when)
+        desc = [s.describe() for s in srt]
         if self.operation == "average" and self.state == State.SOLVED:
-            mini, maxi = findminmax(self.solves)
+            mini, maxi = findminmax(srt)
             # surround min/max with parenthesis
             desc[mini] = f"({desc[mini]})"
             desc[maxi] = f"({desc[maxi]})"
