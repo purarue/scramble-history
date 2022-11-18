@@ -288,9 +288,10 @@ def _print_kitty_images(imgs: List[str]) -> bool:
 @click.option(
     "-r",
     "--reverse/--no-reverse",
+    "_reverse_flag",
     is_flag=True,
-    default=True,
-    help="Reverse the sort for --sort-by. --reverse is the default",
+    default=None,
+    help="Reverse the sort for --sort-by. Default is --no-reverse, stats uses --reverse",
 )
 @click.argument(
     "DATAFILES",
@@ -305,7 +306,7 @@ def merge(
     graph_opt: Sequence[str],
     check: bool,
     sort_by: Optional[str],
-    reverse: bool,
+    _reverse_flag: Optional[bool],
     query: Optional[Query],
     group_by: Optional[str],
     datafiles: Dict[str, List[Path]],
@@ -325,6 +326,15 @@ def merge(
 
     if check:
         return
+
+    # default to False, unless user provided the flag
+    reverse: bool = False
+    if _reverse_flag is None:
+        # default to --reverse in stats since user probably
+        # wants to see their most recent solves
+        reverse = action == "stats"
+    else:
+        reverse = _reverse_flag
 
     if sort_by is not None:
         if sort_by == "when":
@@ -382,6 +392,7 @@ def merge(
             find_best,
             find_worst,
         )
+        from .error import unwrap
         from .timeformat import format_decimal
         from tabulate import tabulate
 
@@ -405,9 +416,15 @@ def merge(
             )
             best_solve = find_best(group_solves).describe()
             worst_solve = find_worst(group_solves).describe()
+            global_mean = unwrap(grouped(group_solves, operation="global_mean"))
+            assert global_mean.solve_count is not None
+            global_mean_desc = operation_code(
+                "global_mean", global_mean.solve_count, len(global_mean.solves)
+            )
             click.echo(f"Best => {best_solve}")
             click.echo(f"Worst => {worst_solve}")
             click.echo(f"Most recent Ao5 => {desc}")
+            click.echo(f"{global_mean_desc} => {format_decimal(global_mean.result)}")
             click.echo(f"Solve Count => {len(group_solves)}")
             stat_data = run_operations(
                 group_solves, operation="average", counts=[5, 12, 50, 100]
@@ -438,7 +455,12 @@ def merge(
 
                 from dataclasses import asdict
                 from .models import State
-                from .error import unwrap
+
+                # if user didnt specify, sort with oldest solves first
+                # (otherwise by default stats would print graphs going
+                # backwards, with your most recent solve at the left)
+                if _reverse_flag is None:
+                    group_solves.sort(key=lambda s: s.when)
 
                 text = ""
                 if "annotate" in graph_opt:

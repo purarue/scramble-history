@@ -233,7 +233,7 @@ Ao12: 19.297 = (25.969) 22.220 (16.050) 22.697 21.193 16.210 16.338 17.824 19.69
 
 Note: this requires `seaborn`, install with `pip install 'scramble-history[optional]'`
 
-For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around etc, and graphs in reverse-chronological order (provide `--no-reverse` to swap)
+For each group selected by `--group-by`, this creates a graph. By default, this pauses at each group and shows the graph so you can move around/zoom in
 
 To save to a png, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
 
@@ -241,7 +241,7 @@ To save to a png, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoy
 
 Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
 
-`scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --no-reverse --graph-opt kitty-print`
+`scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 -g event_description -G --graph-opt kitty-print`
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
 
@@ -336,7 +336,7 @@ $ scramble_history merge -q 'puzzle==222' -q best
 
 ### first/head tail/last
 
-These let you take the first or last `n` items, like `limit`. Remember that by default your newest solves are at the front of the list (you can swap this with `--no-reverse`), so to get your most recent `Ao5`:
+These let you take the first or last `n` items, like `limit`. To get your most recent `Ao5`:
 
 ```bash
 $ scramble_history merge -q 'event_description==4x4' -q 'first:5' -q ao5

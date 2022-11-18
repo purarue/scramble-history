@@ -28,7 +28,7 @@ def findminmax(solves: Union[List[Solve], List[float]]) -> Tuple[int, int]:
 
 def operation_code(operation: Operation, count: int, solves_len: int) -> str:
     if operation == "global_mean":
-        return f"GlobalMean ({count}/{solves_len})"
+        return f"Global Mean ({count}/{solves_len})"
     else:
         if operation == "mean":
             return f"Mo{count}"
@@ -59,7 +59,9 @@ class Grouping(NamedTuple):
         return "DNF" if self.state != State.SOLVED else format_decimal(self.result)
 
     def describe_average(self) -> str:
-        desc = [s.describe() for s in self.solves]
+        # should always sort according to datetime,
+        # first solve should appear first in the average
+        desc = [s.describe() for s in sorted(self.solves, key=lambda sl: sl.when)]
         if self.operation == "average" and self.state == State.SOLVED:
             mini, maxi = findminmax(self.solves)
             # surround min/max with parenthesis
@@ -223,5 +225,8 @@ def find_best(solves: List[Solve]) -> Solve:
 def find_worst(solves: List[Solve]) -> Solve:
     if len(solves) == 0:
         raise ValueError("Tried to find worst solve on empty list")
-    max_i = max(list(enumerate(solves_to_float(solves))), key=lambda o: o[1])[0]
+    without_dnfs: List[Tuple[int, float]] = [
+        tup for tup in enumerate(solves_to_float(solves)) if tup[1] != inf
+    ]
+    max_i = max(without_dnfs, key=lambda o: o[1])[0]
     return solves[max_i]
