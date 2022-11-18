@@ -248,7 +248,7 @@ Can also be used in combination with `--query drop:` and `--query limit:` to onl
 
 Can provide the `annotate` options if you want to add some of the text onto the graph:
 
-`scramble_history merge -q 'event_description==4x4' -q 'last:5' -G --no-reverse --graph-opt annotate --graph-opt annotate-average`
+`scramble_history merge -q 'event_description==4x4' -q 'last:5' -G --graph-opt annotate --graph-opt annotate-average`
 
 <img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/annotated.png?raw=true" height=300>
 
