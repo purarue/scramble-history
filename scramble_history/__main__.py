@@ -336,9 +336,8 @@ def merge(
     else:
         reverse = _reverse_flag
 
-    if sort_by is not None:
-        if sort_by == "when":
-            solves.sort(key=lambda s: s.when, reverse=reverse)
+    if sort_by == "when":
+        solves.sort(key=lambda s: s.when, reverse=reverse)
 
     if query:
         data = run_query(solves, query=query)
