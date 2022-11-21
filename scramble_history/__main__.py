@@ -474,15 +474,6 @@ def merge(
                         if solve.state == State.SOLVED
                     )
                 )
-                ft = pd_input["full_time"]
-                assert ft is not None
-                pd_input["full_time_formatted"] = ft.apply(format_decimal)
-
-                minval: Decimal = pd_input["full_time"].min()  # type: ignore
-                maxval: Decimal = pd_input["full_time"].max()  # type: ignore
-
-                # convert y-axis to duration
-
                 filename = re.sub(
                     r"[\?:\s\/\\]",
                     r"_",
@@ -497,17 +488,8 @@ def merge(
                 )
                 plt.xlabel("solve date" if "date-axis" in graph_opt else "solve #")
                 plt.ylabel("solve time")
-                imin = int(minval)
-                imax = int(maxval)
-                ticks, labels = plt.yticks()
-                # choose numbers in between the min/max, scaled by the current position
-                labels = [
-                    format_decimal(
-                        Decimal(imin + ((imax - imin) * (mult / len(labels))))
-                    )
-                    for mult in range(len(labels))
-                ]
-                plt.yticks(ticks=ticks, labels=labels)
+                ticks, _ = plt.yticks()
+                plt.yticks(ticks=ticks, labels=[format_decimal(t) for t in ticks])
 
                 textbox_props = dict(boxstyle="round", facecolor="lightblue", alpha=0.5)
                 if "annotate" in graph_opt:
