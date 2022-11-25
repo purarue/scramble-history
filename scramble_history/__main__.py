@@ -165,9 +165,10 @@ if not scramble_history_config_dir.exists():
     scramble_history_config_dir.mkdir(parents=True)
 
 
+conf_name = "files.yaml"
 # this needs to be a global path that user cant modify in click option
 # so _parse_merge_inputs can access it
-config_file = scramble_history_config_dir / "files.yaml"
+config_file = scramble_history_config_dir / conf_name
 
 
 def _parse_merge_inputs(
@@ -218,6 +219,9 @@ def _print_kitty_images(imgs: List[str]) -> bool:
     return printed
 
 
+sourcemap_name = "sourcemap.json"
+
+
 @main.command(
     context_settings=dict(
         ignore_unknown_options=True,
@@ -230,7 +234,7 @@ def _print_kitty_images(imgs: List[str]) -> bool:
     "-s",
     "--sourcemap-file",
     help="Data file which saves choices on how to map solves from different sources",
-    default=scramble_history_config_dir / "sourcemap.json",
+    default=scramble_history_config_dir / sourcemap_name,
     show_default=True,
     type=click.Path(dir_okay=False, path_type=Path),
 )
