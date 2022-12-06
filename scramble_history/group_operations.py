@@ -217,17 +217,20 @@ def find_best_group(
 
 
 def find_best(solves: List[Solve]) -> Solve:
-    if len(solves) == 0:
-        raise ValueError("Tried to find best solve on empty list")
-    min_i = min(list(enumerate(solves_to_float(solves))), key=lambda o: o[1])[0]
+    without_dnfs: List[Tuple[int, float]] = [
+        tup for tup in enumerate(solves_to_float(solves)) if tup[1] != inf
+    ]
+    if len(without_dnfs) == 0:
+        raise ValueError("Tried to find best solve on list with no completed solves")
+    min_i = min(without_dnfs, key=lambda o: o[1])[0]
     return solves[min_i]
 
 
 def find_worst(solves: List[Solve]) -> Solve:
-    if len(solves) == 0:
-        raise ValueError("Tried to find worst solve on empty list")
     without_dnfs: List[Tuple[int, float]] = [
         tup for tup in enumerate(solves_to_float(solves)) if tup[1] != inf
     ]
+    if len(without_dnfs) == 0:
+        raise ValueError("Tried to find worst solve list with no completed solves")
     max_i = max(without_dnfs, key=lambda o: o[1])[0]
     return solves[max_i]

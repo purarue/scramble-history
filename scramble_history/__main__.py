@@ -395,6 +395,7 @@ def merge(
             find_best,
             find_worst,
         )
+        from .models import State
         from .error import unwrap
         from .timeformat import format_decimal
         from tabulate import tabulate
@@ -408,6 +409,9 @@ def merge(
         for group_name, _ in by_solve_count:
             group_solves = res[group_name]
             group_solves.sort(key=lambda s: s.when, reverse=reverse)
+            # if this has no valid solves, skip it
+            if len(list(filter(lambda s: s.state == State.SOLVED, group_solves))) == 0:
+                continue
             banner()
             click.echo(group_name)
             banner()
