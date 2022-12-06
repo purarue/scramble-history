@@ -461,7 +461,6 @@ def merge(
                 import pandas as pd  # type: ignore[import]
 
                 from dataclasses import asdict
-                from .models import State
 
                 # if user didnt specify, sort with oldest solves first
                 # (otherwise by default stats would print graphs going
