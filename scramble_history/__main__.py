@@ -55,6 +55,22 @@ def main() -> None:
     pass
 
 
+@main.group("utils", short_help="misc utilities")
+def utils() -> None:
+    pass
+
+
+@utils.command(short_help="invert an algorithm")
+@click.argument("SCRAMBLE", type=str, required=True)
+def inverse_scramble(scramble: str) -> None:
+    """
+    Pass an algorithm as first argument, e.g. "R U R' U R U2 R"
+    """
+    from .invert_scramble import invert_scramble
+
+    click.echo(invert_scramble(scramble))
+
+
 @main.group()
 def export() -> None:
     """
