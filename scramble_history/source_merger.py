@@ -65,7 +65,6 @@ class SourceMerger:
 
     @classmethod
     def _select_keys(cls, data: Any) -> List[str]:
-
         # define inline so this is only imported when its needed to add new solves
         from prompt_toolkit import prompt
         from prompt_toolkit.document import Document
