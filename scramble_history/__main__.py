@@ -114,7 +114,7 @@ def extract(_json: bool, wca_user_id: str) -> None:
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('details', fg='green')} to review TSV data"
-        IPython.embed(header=header)
+        IPython.embed(header=header)  # type: ignore[no-untyped-call]
 
 
 @main.group()
@@ -145,7 +145,7 @@ def cstimer(_json: bool, cstimer_file: Path) -> None:
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('sess', fg='green')} to review session data"
-        IPython.embed(header=header)
+        IPython.embed(header=header)  # type: ignore[no-untyped-call]
 
 
 @parse.command(short_help="parse twistytimer export file")
@@ -170,7 +170,7 @@ def twistytimer(_json: bool, twistytimer_file: Path) -> None:
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('solves', fg='green')} to review your solves"
-        IPython.embed(header=header)
+        IPython.embed(header=header)  # type: ignore[no-untyped-call]
 
 
 config_dir = Path(os.environ.get("XDG_CONFIG_DIR", Path.home() / ".config"))
@@ -401,7 +401,7 @@ def merge(
         import IPython  # type: ignore[import]
 
         header = f"Use {click.style('res', fg='green')} to review"
-        IPython.embed(header=header)
+        IPython.embed(header=header)  # type: ignore[no-untyped-call]
     else:
         from .group_operations import (
             run_operations,
