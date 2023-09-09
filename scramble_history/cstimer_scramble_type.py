@@ -1,5 +1,5 @@
 from typing import NamedTuple, Optional
-from functools import lru_cache
+from collections import defaultdict
 
 
 class CSTimerScramble(NamedTuple):
@@ -200,10 +200,17 @@ SCRAMBLES = [
     CSTimerScramble(scramble_code="eide", category="jokes", name=None),
 ]
 
+# create a defaultdict which creates a list when a key is not found
+SCRAMBLE_MAP = defaultdict(list)
+for scramble in SCRAMBLES:
+    SCRAMBLE_MAP[scramble.scramble_code].append(scramble)
 
-@lru_cache(maxsize=None)
+
 def parse_scramble_type(code: str) -> CSTimerScramble:
-    for scr in SCRAMBLES:
-        if code == scr.scramble_code:
-            return scr
+    try:
+        resp = SCRAMBLE_MAP[code]
+        if resp:
+            return resp[0]
+    except KeyError:
+        pass
     raise KeyError(f"Could not find matching scramble code {code}")
