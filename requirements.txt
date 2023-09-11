@@ -8,3 +8,4 @@ autotui>=0.4.3
 more_itertools
 pyyaml
 tabulate
+simplejson

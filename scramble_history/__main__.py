@@ -4,6 +4,8 @@ import re
 import itertools
 import shutil
 import subprocess
+import enum
+import dataclasses
 import tempfile
 from pathlib import Path
 from typing import Any, List, Dict, Sequence, Optional
@@ -26,20 +28,31 @@ def _default(o: Any) -> Any:
     # them as tuples (arrays), since they're technically a subclass
     if isinstance(o, Decimal):
         return str(o)
+    if dataclasses.is_dataclass(o):
+        return dataclasses.asdict(o)
+    if isinstance(o, enum.Enum):
+        return o.value
+    if isinstance(o, datetime):
+        return o.isoformat()
     if hasattr(o, "_asdict"):
         return o._asdict()
     raise TypeError(f"Could not serialize object of type {type(o).__name__}")
 
 
 def _serialize(data: Any) -> str:
-    import orjson  # type: ignore[import]
+    try:
+        import orjson  # type: ignore[import]
 
-    bdata: bytes = orjson.dumps(
-        data,
-        option=orjson.OPT_NON_STR_KEYS,
-        default=_default,
-    )
-    return bdata.decode("utf-8")
+        bdata: bytes = orjson.dumps(
+            data,
+            option=orjson.OPT_NON_STR_KEYS,
+            default=_default,
+        )
+        return bdata.decode("utf-8")
+    except ImportError:
+        import simplejson  # type: ignore[import]
+
+        return simplejson.dumps(data, default=_default, namedtuple_as_object=True)
 
 
 JSON = click.option(
