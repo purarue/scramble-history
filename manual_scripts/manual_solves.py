@@ -56,7 +56,7 @@ def main(cmd: str) -> None:
             assert len(solves) >= 1, f"no times {solves} {m}"
             assert len(scram) == len(
                 solves
-            ), f"solves didnt match scramble length {scram} {solves}"
+            ), f"solves didn't match scramble length {scram} {solves}"
             if m.is_group:
                 assert len(solves) > 1, f"for group {m}, solve length <= 1"
             for _scr, _sl in zip(scram, solves):

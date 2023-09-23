@@ -195,7 +195,7 @@ if not scramble_history_config_dir.exists():
 
 
 conf_name = "files.yaml"
-# this needs to be a global path that user cant modify in click option
+# this needs to be a global path that user can't modify in click option
 # so _parse_merge_inputs can access it
 config_file = scramble_history_config_dir / conf_name
 
@@ -491,7 +491,7 @@ def merge(
 
                 from dataclasses import asdict
 
-                # if user didnt specify, sort with oldest solves first
+                # if user didn't specify, sort with oldest solves first
                 # (otherwise by default stats would print graphs going
                 # backwards, with your most recent solve at the left)
                 if _reverse_flag is None:

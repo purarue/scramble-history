@@ -16,7 +16,7 @@ To install JSON/graph support: `pip install scramble_history[optional]`
 
 ## Input Formats
 
-If theres some other format you'd like to use, feel free to [open an issue](https://github.com/seanbreckenridge/scramble-history/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) (ideally with a data export so I can try to parse it)
+If there's some other format you'd like to use, feel free to [open an issue](https://github.com/seanbreckenridge/scramble-history/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) (ideally with a data export so I can try to parse it)
 
 ### cstimer
 
