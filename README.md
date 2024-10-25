@@ -16,7 +16,7 @@ To install JSON/graph support: `pip install scramble_history[optional]`
 
 ## Input Formats
 
-If there's some other format you'd like to use, feel free to [open an issue](https://github.com/seanbreckenridge/scramble-history/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) (ideally with a data export so I can try to parse it)
+If there's some other format you'd like to use, feel free to [open an issue](https://github.com/purarue/scramble-history/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) (ideally with a data export so I can try to parse it)
 
 ### cstimer
 
@@ -48,7 +48,7 @@ $ scramble_history parse cstimer -j ~/data/cubing/cstimer/1665942943939.json | j
 }
 ```
 
-To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/seanbreckenridge/cstimer-save-server)
+To backup my <http://cstimer.net> data automatically, I use [cstimer-save-server](https://github.com/purarue/cstimer-save-server)
 
 ### twistytimer | cubers.io
 
@@ -84,7 +84,7 @@ Usage: scramble_history merge [OPTIONS] [DATAFILES]
 
 Options:
   -s, --sourcemap-file FILE       Data file which saves choices on how to map solves from different sources
-                                  [default: /home/sean/.config/scramble_history/sourcemap.json]
+                                  [default: /home/username/.config/scramble_history/sourcemap.json]
   -a, --action [json|repl|stats]  what to do with merged solves  [default: repl]
   -C, --check                     Dont print/interact, just check that all solves are transformed properly
   -g, --group-by [puzzle|event_code|event_description]
@@ -238,19 +238,19 @@ For each group selected by `--group-by`, this creates a graph. By default, this 
 
 To save to a png, use `--graph-opt save`. If you use [kitty](https://sw.kovidgoyal.net/kitty/), can also print these directly in the terminal:
 
-<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/kitty.png?raw=true" height=500>
+<img src="https://github.com/purarue/scramble-history/blob/master/.github/kitty.png?raw=true" height=500>
 
 Can also be used in combination with `--query drop:` and `--query limit:` to only graph a portion of your history. For example to graph a rolling `ao12` from some time ago:
 
 `scramble_history merge -q 'event_description==3x3 CFOP' -q drop:750 -q limit:12 --no-reverse -g event_description -G --graph-opt kitty-print`
 
-<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
+<img src="https://github.com/purarue/scramble-history/blob/master/.github/ao12.png?raw=true" height=300>
 
 Can provide the `annotate` options if you want to add some of the text onto the graph:
 
 `scramble_history merge -q 'event_description==4x4' -q 'last:5' -G --graph-opt annotate --graph-opt annotate-average`
 
-<img src="https://github.com/seanbreckenridge/scramble-history/blob/master/.github/annotated.png?raw=true" height=300>
+<img src="https://github.com/purarue/scramble-history/blob/master/.github/annotated.png?raw=true" height=300>
 
 ### merge query commands:
 
@@ -359,7 +359,7 @@ Also extracts competition/location data for any competitions you've attended
 ```
 $ scramble_history export wca update
 [I 221017 23:02:52 wca_export:80] Downloading TSV export...
-[I 221017 23:02:58 wca_export:96] Saved TSV export to /home/sean/.cache/wca_export/tsv
+[I 221017 23:02:58 wca_export:96] Saved TSV export to /home/username/.cache/wca_export/tsv
 $ scramble_history export wca extract -u 2017BREC02
 ...
 
@@ -384,7 +384,7 @@ BayAreaSpeedcubin212019 skewb 1272 1999 1924 1222 2143
 ## Tests
 
 ```bash
-git clone 'https://github.com/seanbreckenridge/scramble-history'
+git clone 'https://github.com/purarue/scramble-history'
 cd ./scramble-history
 pip install '.[testing]'
 pytest
