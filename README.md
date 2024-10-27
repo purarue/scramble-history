@@ -114,7 +114,7 @@ The merge command lets you combine solves from different sources into a normaliz
 }
 ```
 
-Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history/sourcemap.json`. As an example of the generated file, you can see mine [here](https://sean.fish/d/scramble_history/sourcemap.json?redirect)
+Whenever it finds the same `class`, `name` and `raw_scramble_type` (fields from `cstimer.Solve`), it tags them with the `puzzle`, `event_code` and `event_description`. Those are entered by you (once per new type of solve), and then saved to `~/.config/scramble_history/sourcemap.json`. As an example of the generated file, you can see mine [here](https://purarue.xyz/d/scramble_history/sourcemap.json?redirect)
 
 The merge command accepts options which describe the filetype, and then multiple files, removing any duplicate solves it finds. E.g.:
 
