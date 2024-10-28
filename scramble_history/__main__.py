@@ -489,7 +489,7 @@ def merge(
             if graph:
                 from dataclasses import asdict
 
-                import matplotlib.pyplot as plt
+                import matplotlib.pyplot as plt  # type: ignore[import]
                 import seaborn as sns  # type: ignore[import]
                 import pandas as pd  # type: ignore[import]
                 import numpy as np  # type: ignore[import]
