@@ -6,7 +6,7 @@ Parses your rubiks cube solve history from [cstimer.net](https://cstimer.net/), 
 
 ## Installation
 
-Requires `python3.8+`
+Requires `python3.10+`
 
 To install with pip, run:
 
