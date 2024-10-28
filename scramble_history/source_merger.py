@@ -88,7 +88,7 @@ class SourceMerger:
         possible_keys = []
         if isinstance(data, dict):
             possible_keys.extend(list(data.keys()))
-        elif is_dataclass(data):
+        elif is_dataclass(data) and not isinstance(data, type):
             possible_keys.extend(list(asdict(data).keys()))
         elif hasattr(data, "_asdict") and callable(data._asdict):
             possible_keys.extend(list(data._asdict().keys()))

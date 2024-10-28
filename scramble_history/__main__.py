@@ -28,7 +28,7 @@ def _default(o: Any) -> Any:
     # them as tuples (arrays), since they're technically a subclass
     if isinstance(o, Decimal):
         return str(o)
-    if dataclasses.is_dataclass(o):
+    if dataclasses.is_dataclass(o) and not isinstance(o, type):
         return dataclasses.asdict(o)
     if isinstance(o, enum.Enum):
         return o.value
@@ -475,9 +475,11 @@ def merge(
                         [
                             operation_code("average", count_, count_),
                             stat_data[count_],
-                            format_decimal(best[count_].result)
-                            if count_ in best
-                            else "--",
+                            (
+                                format_decimal(best[count_].result)
+                                if count_ in best
+                                else "--"
+                            ),
                         ]
                         for count_ in stat_data.keys()
                     ],
@@ -485,11 +487,12 @@ def merge(
                 )
             )
             if graph:
-                import seaborn as sns  # type: ignore[import]
-                import matplotlib.pyplot as plt  # type: ignore[import]
-                import pandas as pd  # type: ignore[import]
-
                 from dataclasses import asdict
+
+                import matplotlib.pyplot as plt
+                import seaborn as sns  # type: ignore[import]
+                import pandas as pd  # type: ignore[import]
+                import numpy as np
 
                 # if user didn't specify, sort with oldest solves first
                 # (otherwise by default stats would print graphs going
@@ -525,7 +528,8 @@ def merge(
                 plt.xlabel("solve date" if "date-axis" in graph_opt else "solve #")
                 plt.ylabel("solve time")
                 ticks, _ = plt.yticks()
-                plt.yticks(ticks=ticks, labels=[format_decimal(t) for t in ticks])
+                labels = [format_decimal(t) for t in ticks]  # type: ignore[arg-type]
+                plt.yticks(ticks=ticks, labels=labels)  # type: ignore[arg-type]
 
                 textbox_props = dict(boxstyle="round", facecolor="lightblue", alpha=0.5)
                 if "annotate" in graph_opt:
