@@ -492,7 +492,7 @@ def merge(
                 import matplotlib.pyplot as plt
                 import seaborn as sns  # type: ignore[import]
                 import pandas as pd  # type: ignore[import]
-                import numpy as np
+                import numpy as np  # type: ignore[import]
 
                 # if user didn't specify, sort with oldest solves first
                 # (otherwise by default stats would print graphs going

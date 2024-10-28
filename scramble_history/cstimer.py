@@ -47,9 +47,9 @@ class Solve(NamedTuple):
     def _prompt_defaults(self) -> Dict[str, Any]:
         return {
             "transformed_puzzle": self.raw_scramble_type,
-            "transformed_event_description": self.scramble_type.name
-            if self.scramble_type is not None
-            else None,
+            "transformed_event_description": (
+                self.scramble_type.name if self.scramble_type is not None else None
+            ),
         }
 
     def _transform_map(self) -> Dict[str, Any]:
