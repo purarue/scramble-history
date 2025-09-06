@@ -63,7 +63,7 @@ warn_return_any = "True"
 warn_unreachable = "True"
 
 [tool.pytest.ini_options]
-addopts = ["--doctest-modules scramble_history", "--verbose", "tests"]
+addopts = "--doctest-modules scramble_history --verbose tests"
 
 [tool.setuptools.packages.find]
 include = ["scramble_history"]
