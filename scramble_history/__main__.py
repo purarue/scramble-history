@@ -260,7 +260,6 @@ sourcemap_name = "sourcemap.json"
     short_help="merge solves together",
 )
 @click.option(
-    "-s",
     "--sourcemap-file",
     help="Data file which saves choices on how to map solves from different sources",
     default=scramble_history_config_dir / sourcemap_name,

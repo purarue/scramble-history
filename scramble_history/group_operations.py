@@ -193,26 +193,31 @@ def find_best_group(
     res: Dict[int, Grouping] = {}
     solves_flt = solves_to_float(solves)
     for c in counts:
+        if len(solves) < c:
+            continue
         try:
+            groups = list(
+                g
+                for g in (
+                    grouped(
+                        solves_dc=solves[i:],
+                        operation=operation,
+                        solves_flt=solves_flt[i:],
+                        count=c,
+                    )
+                    for i in range(len(solves) - c + 1)
+                )
+            )
             res[c] = min(
                 (
                     g
-                    for g in (
-                        grouped(
-                            solves_dc=solves[i:],
-                            operation=operation,
-                            solves_flt=solves_flt[i:],
-                            count=c,
-                        )
-                        for i in range(len(solves) - c + 1)
-                    )
+                    for g in groups
                     if not isinstance(g, Exception) and g.state == State.SOLVED
                 ),
                 key=lambda gr: gr.result,
             )
         except ValueError as e:
-            if str(e) != "min() arg is an empty sequence":
-                raise e
+            raise e
     return res
 
 
