@@ -7,8 +7,8 @@ def format_decimal(d: Decimal | float | numpy.float64) -> str:
     minutes, seconds = divmod(float(d), 60)
     hours, minutes = divmod(minutes, 60)
     if hours > 0:
-        return "{:01d}:{:02d}:{:0>6.3f}".format(int(hours), int(minutes), seconds)
+        return f"{int(hours):01d}:{int(minutes):02d}:{seconds:0>6.3f}"
     elif minutes > 0:
-        return "{:01d}:{:0>6.3f}".format(int(minutes), seconds)
+        return f"{int(minutes):01d}:{seconds:0>6.3f}"
     else:
-        return "{:0>5.3f}".format(seconds)
+        return f"{seconds:0>5.3f}"

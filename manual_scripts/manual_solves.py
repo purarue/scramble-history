@@ -18,18 +18,18 @@ class RawComment(NamedTuple):
     event: str
     scrambles: str
     when: datetime
-    method: Optional[str]
-    comment: Optional[str]
+    method: str | None
+    comment: str | None
 
     @staticmethod
-    def attr_use_values() -> Dict[str, Any]:
+    def attr_use_values() -> dict[str, Any]:
         return {
             "scrambles": lambda: edit_in_vim("scramble"),
             "times": lambda: edit_in_vim("times"),
         }
 
 
-def edit_in_vim(text: Optional[str]) -> Optional[str]:
+def edit_in_vim(text: str | None) -> str | None:
     m = click.edit(text=text, editor="nvim")
     return m if m is None else m.strip()
 
@@ -49,7 +49,7 @@ def main(cmd: str) -> None:
         while True:
             autotui.shortcuts.load_prompt_and_writeback(RawComment, manual_solves_file)
     else:
-        parsed: List[Solve] = []
+        parsed: list[Solve] = []
         for m in autotui.shortcuts.load_from(RawComment, manual_solves_file):
             solves = parse_average(m.times)
             scram = [scr.strip() for scr in m.scrambles.splitlines()]

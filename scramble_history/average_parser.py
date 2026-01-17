@@ -13,7 +13,7 @@ def _is_float_like(s: str) -> bool:
         return False
 
 
-def parse_average(average_str: str) -> List[Union[Decimal, str]]:
+def parse_average(average_str: str) -> list[Decimal | str]:
     """
     Parses times that look like:
     3x3: 22.03 = (DNF), 25.14, 21.69, 19.26, (25.63)
@@ -46,7 +46,7 @@ def parse_average(average_str: str) -> List[Union[Decimal, str]]:
         raw_solves = [average_str]
     # remove parens
     raw_solves = [s.strip().lstrip("(").rstrip(")") for s in raw_solves]
-    solves: List[Union[Decimal, str]] = []
+    solves: list[Decimal | str] = []
     for s in raw_solves:
         if s.lower() in ("dns", "dnf"):
             solves.append(s.upper())
@@ -54,7 +54,7 @@ def parse_average(average_str: str) -> List[Union[Decimal, str]]:
             if _is_float_like(s):
                 solves.append(Decimal(s))
                 continue
-            td: Optional[Union[float, int]] = pytimeparse.parse(s)
+            td: float | int | None = pytimeparse.parse(s)
             if td is None:
                 solves.append(s)
                 warnings.warn(f"Warning: Not sure how to parse token {s}")
@@ -63,7 +63,7 @@ def parse_average(average_str: str) -> List[Union[Decimal, str]]:
     return solves
 
 
-def parse_operation_code(op: str) -> Tuple[Operation, int]:
+def parse_operation_code(op: str) -> tuple[Operation, int]:
     op = op.lower().lower()
     if op.startswith("ao"):
         return "average", int(op[2:])

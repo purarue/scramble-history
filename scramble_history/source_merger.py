@@ -9,7 +9,8 @@ import warnings
 from pprint import pprint
 from pathlib import Path
 from dataclasses import is_dataclass, asdict
-from typing import NamedTuple, Optional, Any, Dict, List, Iterator, TYPE_CHECKING
+from typing import NamedTuple, Optional, Any, Dict, List, TYPE_CHECKING
+from collections.abc import Iterator
 
 if TYPE_CHECKING:
     from prompt_toolkit.completion import FuzzyWordCompleter
@@ -32,7 +33,7 @@ class SourceMap(NamedTuple):
     #
     # since the 'category'/session name is just a user defined string, user has
     # to be prompted to make sure multiple sources can be merged
-    source_fields_match: Dict[str, Any]
+    source_fields_match: dict[str, Any]
 
     # the normalized fields to use if source_fields_match match
     transformed_puzzle: str
@@ -43,7 +44,7 @@ class SourceMap(NamedTuple):
 class SourceMerger:
     def __init__(self, sourcemap_file: Path) -> None:
         self.sourcemap_file = sourcemap_file
-        self.sourcemap: List[SourceMap] = []
+        self.sourcemap: list[SourceMap] = []
         self.load()
 
     def load(self) -> None:
@@ -54,17 +55,17 @@ class SourceMerger:
         self.sourcemap_file.write_text(self.sourcemap_dumps(self.sourcemap))
 
     @staticmethod
-    def sourcemap_loads(json_data: str) -> List[SourceMap]:
+    def sourcemap_loads(json_data: str) -> list[SourceMap]:
         data = json.loads(json_data)
         assert isinstance(data, list)
         return [SourceMap(**kw) for kw in data]
 
     @staticmethod
-    def sourcemap_dumps(sm: List[SourceMap]) -> str:
+    def sourcemap_dumps(sm: list[SourceMap]) -> str:
         return json.dumps([d._asdict() for d in sm], indent=4)
 
     @classmethod
-    def _select_keys(cls, data: Any) -> List[str]:
+    def _select_keys(cls, data: Any) -> list[str]:
         # define inline so this is only imported when its needed to add new solves
         from prompt_toolkit import prompt
         from prompt_toolkit.document import Document
@@ -110,7 +111,7 @@ class SourceMerger:
         return text.strip().split()
 
     def _create_validator(
-        self, key: str, defaults: Dict[str, Any]
+        self, key: str, defaults: dict[str, Any]
     ) -> "FuzzyWordCompleter":
         from prompt_toolkit.completion import FuzzyWordCompleter
 
@@ -158,7 +159,7 @@ class SourceMerger:
     def _qualclassname(solve: Any) -> str:
         return f"{solve.__module__}.{solve.__class__.__name__}"
 
-    def match_sourcemap(self, solve: Any) -> Optional[SourceMap]:
+    def match_sourcemap(self, solve: Any) -> SourceMap | None:
         for s in self.sourcemap:
             if s.source_class_name != self._qualclassname(solve):
                 continue
@@ -172,7 +173,7 @@ class SourceMerger:
     def match_or_prompt(self, solve: Any) -> SourceMap:
         return self.match_sourcemap(solve) or self.prompt_for_transform(solve)
 
-    def transform(self, solve: Any, sourcemap: Optional[SourceMap] = None) -> Solve:
+    def transform(self, solve: Any, sourcemap: SourceMap | None = None) -> Solve:
         if sourcemap is None:
             sourcemap = self.match_or_prompt(solve)
         # each source (cstimer or twistytimer) returns a dict

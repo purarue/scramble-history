@@ -52,7 +52,7 @@ class Solve:
     state: State
     # standard user-facing stuff here
     scramble: str
-    comment: Optional[str]
+    comment: str | None
     time: Decimal
     penalty: Decimal
 

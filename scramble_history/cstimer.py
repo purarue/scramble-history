@@ -2,7 +2,8 @@ import sys
 import json
 from decimal import Decimal
 from itertools import chain
-from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple, Iterator
+from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,15 +27,15 @@ class Session(NamedTuple):
     number: int
     name: str
     raw_scramble_type: str
-    scramble_type: Optional[CSTimerScramble]
-    solves: List[SessionSolve]
+    scramble_type: CSTimerScramble | None
+    solves: list[SessionSolve]
 
 
 class Solve(NamedTuple):
     number: int
     name: str
     raw_scramble_type: str
-    scramble_type: Optional[CSTimerScramble]
+    scramble_type: CSTimerScramble | None
 
     scramble: str
     comment: str
@@ -44,7 +45,7 @@ class Solve(NamedTuple):
     when: datetime
 
     @property
-    def _prompt_defaults(self) -> Dict[str, Any]:
+    def _prompt_defaults(self) -> dict[str, Any]:
         return {
             "transformed_puzzle": self.raw_scramble_type,
             "transformed_event_description": (
@@ -52,7 +53,7 @@ class Solve(NamedTuple):
             ),
         }
 
-    def _transform_map(self) -> Dict[str, Any]:
+    def _transform_map(self) -> dict[str, Any]:
         return dict(
             state=State.DNF if self.dnf else State.SOLVED,
             scramble=self.scramble,
@@ -64,12 +65,12 @@ class Solve(NamedTuple):
         )
 
 
-def parse_file(path: Path) -> List[Session]:
+def parse_file(path: Path) -> list[Session]:
     with path.open("r") as f:
         return _parse_blob(f)
 
 
-def denormalize(sessions: List[Session]) -> Iterator[Solve]:
+def denormalize(sessions: list[Session]) -> Iterator[Solve]:
     for sess in sessions:
         for solve in sess.solves:
             yield Solve(
@@ -86,16 +87,16 @@ def denormalize(sessions: List[Session]) -> Iterator[Solve]:
             )
 
 
-def _parse_blob(f: TextIO) -> List[Session]:
+def _parse_blob(f: TextIO) -> list[Session]:
     data = json.loads(f.read())
-    props: Dict[str, Any] = data["properties"]
+    props: dict[str, Any] = data["properties"]
     session_raw: str = props["sessionData"]
     assert isinstance(
         session_raw, str
     ), "Fatal error parsing sessions, expected sessionData to be string"
     session_info = json.loads(session_raw)
 
-    sessions: List[Session] = []
+    sessions: list[Session] = []
 
     # parse each session
     for session_number, session_val in session_info.items():
@@ -116,7 +117,7 @@ def _parse_blob(f: TextIO) -> List[Session]:
         raw_scrambles = data[data_key]
         scrambles = map(_parse_scramble, raw_scrambles)
 
-        scramble_type: Optional[CSTimerScramble] = None
+        scramble_type: CSTimerScramble | None = None
         try:
             scramble_type = parse_scramble_type(scramble_code)
         except KeyError:
@@ -135,10 +136,10 @@ def _parse_blob(f: TextIO) -> List[Session]:
     return sessions
 
 
-RawScramble = Tuple[Tuple[int, int], str, str, int]
+RawScramble = tuple[tuple[int, int], str, str, int]
 
 
-def _parse_scramble(raw: RawScramble) -> Optional[SessionSolve]:
+def _parse_scramble(raw: RawScramble) -> SessionSolve | None:
     try:
         [[penalty, solve_time], scramble, comment, timestamp] = raw
         is_dnf = penalty == -1
@@ -160,7 +161,7 @@ def _parse_scramble(raw: RawScramble) -> Optional[SessionSolve]:
         return None
 
 
-def merge_files(paths: List[Path]) -> Iterator[Solve]:
+def merge_files(paths: list[Path]) -> Iterator[Solve]:
     yield from unique_everseen(
         chain(*(denormalize(parse_file(p)) for p in paths)),
         key=lambda s: (s.solve_time + s.penalty, s.when),

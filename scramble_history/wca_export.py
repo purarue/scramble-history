@@ -7,13 +7,13 @@ from typing import (
     Optional,
     List,
     cast,
-    Iterator,
     Set,
     Tuple,
     NamedTuple,
     TypeVar,
     Type,
 )
+from collections.abc import Iterator
 from dataclasses import dataclass
 from collections import defaultdict
 from pathlib import Path
@@ -41,18 +41,18 @@ class ExportDownloader:
         )
 
     @lru_cache(maxsize=1)
-    def export_links(self) -> Dict[str, str]:
+    def export_links(self) -> dict[str, str]:
         req = requests.get(self.export_data_url)
         req.raise_for_status()
         data = req.json()
         assert isinstance(data, dict)
-        return cast(Dict[str, str], data)
+        return cast(dict[str, str], data)
 
     @property
     def export_date_path(self) -> Path:
         return self.cache_dir / "export_date.txt"
 
-    def export_date(self) -> Optional[str]:
+    def export_date(self) -> str | None:
         if self.export_date_path.exists():
             return self.export_date_path.read_text().strip()
         else:
@@ -102,11 +102,11 @@ class ExportDownloader:
             logger.info("Export is already up to date")
 
 
-TSV = List[str]
+TSV = list[str]
 
 
 def _extract_records(wca_user_id: str, results_file: str) -> Iterator[TSV]:
-    with open(results_file, "r", newline="") as f:
+    with open(results_file, newline="") as f:
         reader = csv.reader(f, delimiter="\t")
         next(reader)
         for line in reader:
@@ -118,9 +118,9 @@ T = TypeVar("T")
 
 
 # splat a TSV row onto a namedtuple, handling extra fields if missing
-def row_to_type(data: List[str], nt: Type[T]) -> T:
+def row_to_type(data: list[str], nt: type[T]) -> T:
     assert hasattr(nt, "_fields")
-    fields: Tuple[str] = cast(Tuple[str], getattr(nt, "_fields"))
+    fields: tuple[str] = cast(tuple[str], getattr(nt, "_fields"))
     assert isinstance(fields, tuple)
     while len(data) < len(fields):
         data.append("")
@@ -150,7 +150,7 @@ class WCA_Result(NamedTuple):
     regionalAverageRecord: str
 
     @classmethod
-    def parse(cls, data: List[str]) -> "WCA_Result":
+    def parse(cls, data: list[str]) -> "WCA_Result":
         return row_to_type(data, cls)
 
 
@@ -165,14 +165,14 @@ class WCA_Scramble(NamedTuple):
     scramble: str
 
     @classmethod
-    def parse(cls, data: List[str]) -> "WCA_Scramble":
+    def parse(cls, data: list[str]) -> "WCA_Scramble":
         return row_to_type(data, cls)
 
 
 def _extract_scrambles_for_competitions(
-    competitions_file: str, competitions: Set[str]
+    competitions_file: str, competitions: set[str]
 ) -> Iterator[TSV]:
-    with open(competitions_file, "r", newline="") as f:
+    with open(competitions_file, newline="") as f:
         reader = csv.reader(f, delimiter="\t")
         next(reader)
         for line in reader:
@@ -181,9 +181,9 @@ def _extract_scrambles_for_competitions(
 
 
 def _match_records_and_scrambles(
-    records: List[WCA_Result], scrambles: List[WCA_Scramble]
-) -> Iterator[Tuple[WCA_Result, List[WCA_Scramble]]]:
-    results_scramble_map: Dict[WCA_Result, List[WCA_Scramble]] = defaultdict(list)
+    records: list[WCA_Result], scrambles: list[WCA_Scramble]
+) -> Iterator[tuple[WCA_Result, list[WCA_Scramble]]]:
+    results_scramble_map: dict[WCA_Result, list[WCA_Scramble]] = defaultdict(list)
     for record in records:
         for scramble in scrambles:
             if (
@@ -221,12 +221,12 @@ class WCA_Competition(NamedTuple):
     longitude: str
 
     @classmethod
-    def parse(cls, data: List[str]) -> "WCA_Competition":
+    def parse(cls, data: list[str]) -> "WCA_Competition":
         return row_to_type(data, cls)
 
 
-def _competition_data(competition_file: str, competitions: Set[str]) -> Iterator[TSV]:
-    with open(competition_file, "r", newline="") as f:
+def _competition_data(competition_file: str, competitions: set[str]) -> Iterator[TSV]:
+    with open(competition_file, newline="") as f:
         reader = csv.reader(f, delimiter="\t")
         for line in reader:
             if line[0] in competitions:
@@ -235,8 +235,8 @@ def _competition_data(competition_file: str, competitions: Set[str]) -> Iterator
 
 @dataclass
 class Details:
-    competition_data: List[WCA_Competition]
-    results_w_scrambles: List[Tuple[WCA_Result, List[WCA_Scramble]]]
+    competition_data: list[WCA_Competition]
+    results_w_scrambles: list[tuple[WCA_Result, list[WCA_Scramble]]]
 
 
 def parse_return_all_details(wca_user_id: str) -> Details:

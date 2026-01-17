@@ -8,7 +8,8 @@ import enum
 import dataclasses
 import tempfile
 from pathlib import Path
-from typing import Any, List, Dict, Sequence, Optional
+from typing import Any, List, Dict, Optional
+from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
 
@@ -237,7 +238,7 @@ def banner() -> None:
 KITTY_PATH = shutil.which("kitty")
 
 
-def _print_kitty_images(imgs: List[str]) -> bool:
+def _print_kitty_images(imgs: list[str]) -> bool:
     if os.environ.get("TERM") != "xterm-kitty":
         return False
     printed = False
@@ -337,11 +338,11 @@ def merge(
     graph: bool,
     graph_opt: Sequence[str],
     check: bool,
-    sort_by: Optional[str],
-    _reverse_flag: Optional[bool],
-    query: Optional[Query],
-    group_by: Optional[str],
-    datafiles: Dict[str, List[Path]],
+    sort_by: str | None,
+    _reverse_flag: bool | None,
+    query: Query | None,
+    group_by: str | None,
+    datafiles: dict[str, list[Path]],
 ) -> None:
     """
     merge solves from different data sources together

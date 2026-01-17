@@ -16,7 +16,7 @@ class Filter(NamedTuple):
 
 class FilterIn(NamedTuple):
     attr: str
-    values: Set[str]
+    values: set[str]
 
 
 class Average(NamedTuple):
@@ -44,14 +44,14 @@ Commands = Literal["dump", "best"]
 
 QueryPart = Union[Filter, FilterIn, Average, Commands, Drop, Limit, Head, Tail]
 
-Query = List[QueryPart]
+Query = list[QueryPart]
 
 
 def _parse_colon_cmd(text: str) -> int:
     return int(text.split(":", maxsplit=1)[-1])
 
 
-def parse_query(inputs: Union[str, List[str]]) -> Query:
+def parse_query(inputs: str | list[str]) -> Query:
     raw_tokens = []
     if isinstance(inputs, str):
         raw_tokens.append(inputs)
@@ -109,11 +109,11 @@ def parse_query(inputs: Union[str, List[str]]) -> Query:
     return parsed
 
 
-QueryRet = Union[Tuple[str, ...], List[Solve]]
+QueryRet = Union[tuple[str, ...], list[Solve]]
 
 
-def run_query(solves: List[Solve], *, query: Query) -> QueryRet:
-    returns: List[str] = []
+def run_query(solves: list[Solve], *, query: Query) -> QueryRet:
+    returns: list[str] = []
     for qr in query:
         if isinstance(qr, (Filter, FilterIn)):
             if len(solves) == 0:

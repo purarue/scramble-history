@@ -3,10 +3,11 @@ import warnings
 from pathlib import Path
 from glob import glob as do_glob
 from collections import defaultdict
-from typing import Iterable, List, Union, Optional, Dict, Mapping
+from typing import List, Union, Optional, Dict
+from collections.abc import Iterable, Mapping
 
 PathIsh = Union[Path, str]
-Paths = Union[PathIsh, List[PathIsh]]
+Paths = Union[PathIsh, list[PathIsh]]
 
 
 DEFAULT_GLOB = "*"
@@ -16,8 +17,8 @@ DEFAULT_GLOB = "*"
 def get_files(
     pp: Paths,
     glob: str = DEFAULT_GLOB,
-) -> List[Path]:
-    sources: List[Path]
+) -> list[Path]:
+    sources: list[Path]
     if isinstance(pp, Path):
         sources = [pp]
     elif isinstance(pp, str):
@@ -28,7 +29,7 @@ def get_files(
         ), f"Input should either be a Path, string or list of paths, found {type(pp)}"
         sources = [Path(p) for p in pp]
 
-    paths: List[Path] = []
+    paths: list[Path] = []
     for src in sources:
         if src.parts[0] == "~":
             src = src.expanduser()
@@ -52,14 +53,14 @@ def get_files(
     return paths
 
 
-ConfigPaths = Dict[str, List[Path]]
+ConfigPaths = dict[str, list[Path]]
 
 
-def parse_config_file(file: Path) -> Dict[str, List[Path]]:
+def parse_config_file(file: Path) -> dict[str, list[Path]]:
     return parse_config(file.read_text())
 
 
-def parse_config(data: str) -> Dict[str, List[Path]]:
+def parse_config(data: str) -> dict[str, list[Path]]:
     import yaml
 
     buf = io.StringIO(data)
@@ -74,9 +75,9 @@ KNOWN_PARSERS = {"cstimer", "twistytimer"}
 
 
 # used in the CLI to parse unprocessed arguments
-def group_args_by_options(args: List[str]) -> ConfigPaths:
-    parser: Optional[str] = None
-    parsed: Mapping[str, List[Path]] = defaultdict(list)
+def group_args_by_options(args: list[str]) -> ConfigPaths:
+    parser: str | None = None
+    parsed: Mapping[str, list[Path]] = defaultdict(list)
     for p in args:
         if parser is None or p.startswith("--"):
             parser = p.strip().strip("-")

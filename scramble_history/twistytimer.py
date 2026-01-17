@@ -4,7 +4,8 @@ import io
 from pathlib import Path
 from itertools import chain
 from decimal import Decimal
-from typing import NamedTuple, Iterator, List, Dict, Any
+from typing import NamedTuple, List, Dict, Any
+from collections.abc import Iterator
 from datetime import datetime, timezone
 
 from more_itertools import unique_everseen
@@ -22,7 +23,7 @@ class Solve(NamedTuple):
     when: datetime
     comment: str
 
-    def to_csv_list(self) -> List[str]:
+    def to_csv_list(self) -> list[str]:
         penalty_code = 0
         if self.penalty == Decimal("2"):
             penalty_code = 1
@@ -39,13 +40,13 @@ class Solve(NamedTuple):
         ]
 
     @property
-    def _prompt_defaults(self) -> Dict[str, Any]:
+    def _prompt_defaults(self) -> dict[str, Any]:
         return {
             "transformed_puzzle": self.puzzle,
             "transformed_event_description": self.category,
         }
 
-    def _transform_map(self) -> Dict[str, Any]:
+    def _transform_map(self) -> dict[str, Any]:
         return dict(
             state=State.DNF if self.dnf else State.SOLVED,
             scramble=self.scramble,
@@ -60,7 +61,7 @@ class Solve(NamedTuple):
 HEADER: str = "Puzzle,Category,Time(millis),Date(millis),Scramble,Penalty,Comment"
 
 
-def serialize_solves(solves: List[Solve]) -> str:
+def serialize_solves(solves: list[Solve]) -> str:
     buf = io.StringIO()
     buf.write(HEADER)
     buf.write("\n")
@@ -99,7 +100,7 @@ def parse_file(path: Path) -> Iterator[Solve]:
             )
 
 
-def merge_files(paths: List[Path]) -> Iterator[Solve]:
+def merge_files(paths: list[Path]) -> Iterator[Solve]:
     yield from unique_everseen(
         chain(*(parse_file(p) for p in paths)),
         key=lambda s: (s.time + s.penalty, s.when),

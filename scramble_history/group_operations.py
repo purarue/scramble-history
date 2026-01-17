@@ -8,15 +8,15 @@ from .error import Res
 from .timeformat import format_decimal
 
 
-def solves_to_float(solves_dec: List[Solve]) -> List[float]:
+def solves_to_float(solves_dec: list[Solve]) -> list[float]:
     return [inf if s.state != State.SOLVED else float(s.full_time) for s in solves_dec]
 
 
-def findminmax(solves: Union[List[Solve], List[float]]) -> Tuple[int, int]:
+def findminmax(solves: list[Solve] | list[float]) -> tuple[int, int]:
     """
     returns indexes of min, max
     """
-    solves_enumd: List[Tuple[int, float]]
+    solves_enumd: list[tuple[int, float]]
     if isinstance(solves[0], Solve):
         solves_enumd = list(enumerate(solves_to_float(solves)))  # type: ignore[arg-type]
     else:
@@ -41,8 +41,8 @@ class Grouping(NamedTuple):
     operation: Operation
     state: State
     result: Decimal
-    solves: List[Solve]
-    solve_count: Optional[int]
+    solves: list[Solve]
+    solve_count: int | None
 
     def __str__(self) -> str:
         return self.describe()
@@ -75,11 +75,11 @@ class Grouping(NamedTuple):
 
 
 def grouped(
-    solves_dc: List[Solve],
+    solves_dc: list[Solve],
     *,
     operation: Operation,
-    solves_flt: Optional[List[float]] = None,
-    count: Optional[int] = None,
+    solves_flt: list[float] | None = None,
+    count: int | None = None,
 ) -> Res[Grouping]:
     """
     solves should be sorted/ordered prior to doing a grouping
@@ -171,12 +171,12 @@ def grouped(
 
 
 def run_operations(
-    solves: List[Solve], operation: Operation, counts: List[int]
-) -> Dict[int, str]:
+    solves: list[Solve], operation: Operation, counts: list[int]
+) -> dict[int, str]:
     """
     User-facing function to run multiple operations and catch possible errors
     """
-    res: Dict[int, str] = {}
+    res: dict[int, str] = {}
     for c in counts:
         gr = grouped(solves, operation=operation, count=c)
         if isinstance(gr, Exception):
@@ -188,9 +188,9 @@ def run_operations(
 
 
 def find_best_group(
-    solves: List[Solve], operation: Operation, counts: List[int]
-) -> Dict[int, Grouping]:
-    res: Dict[int, Grouping] = {}
+    solves: list[Solve], operation: Operation, counts: list[int]
+) -> dict[int, Grouping]:
+    res: dict[int, Grouping] = {}
     solves_flt = solves_to_float(solves)
     for c in counts:
         if len(solves) < c:
@@ -221,8 +221,8 @@ def find_best_group(
     return res
 
 
-def find_best(solves: List[Solve]) -> Solve:
-    without_dnfs: List[Tuple[int, float]] = [
+def find_best(solves: list[Solve]) -> Solve:
+    without_dnfs: list[tuple[int, float]] = [
         tup for tup in enumerate(solves_to_float(solves)) if tup[1] != inf
     ]
     if len(without_dnfs) == 0:
@@ -231,8 +231,8 @@ def find_best(solves: List[Solve]) -> Solve:
     return solves[min_i]
 
 
-def find_worst(solves: List[Solve]) -> Solve:
-    without_dnfs: List[Tuple[int, float]] = [
+def find_worst(solves: list[Solve]) -> Solve:
+    without_dnfs: list[tuple[int, float]] = [
         tup for tup in enumerate(solves_to_float(solves)) if tup[1] != inf
     ]
     if len(without_dnfs) == 0:

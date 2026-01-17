@@ -4,8 +4,8 @@ from collections import defaultdict
 
 class CSTimerScramble(NamedTuple):
     scramble_code: str
-    category: Optional[str]
-    name: Optional[str]
+    category: str | None
+    name: str | None
 
 
 # instead of dict/mapping just save all possible data
