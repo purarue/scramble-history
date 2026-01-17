@@ -1,7 +1,7 @@
 from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 from decimal import Decimal
 
 from .timeformat import format_decimal

@@ -1,5 +1,4 @@
 import warnings
-from typing import List, Union, Optional, Tuple
 from decimal import Decimal
 
 from .models import Operation

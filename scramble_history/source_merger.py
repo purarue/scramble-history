@@ -9,7 +9,7 @@ import warnings
 from pprint import pprint
 from pathlib import Path
 from dataclasses import is_dataclass, asdict
-from typing import NamedTuple, Optional, Any, Dict, List, TYPE_CHECKING
+from typing import NamedTuple, Any, TYPE_CHECKING
 from collections.abc import Iterator
 
 if TYPE_CHECKING:

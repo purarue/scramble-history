@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from typing import NamedTuple, Optional, List, Dict, Any
+from typing import NamedTuple, Any
 from decimal import Decimal
 from datetime import datetime
 

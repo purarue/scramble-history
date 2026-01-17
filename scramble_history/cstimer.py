@@ -2,7 +2,7 @@ import sys
 import json
 from decimal import Decimal
 from itertools import chain
-from typing import Dict, Any, NamedTuple, List, TextIO, Optional, Tuple
+from typing import Any, NamedTuple, TextIO
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path

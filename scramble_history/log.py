@@ -1,6 +1,5 @@
 import os
 import logging
-from typing import Optional
 
 from logzero import setup_logger  # type: ignore[import]
 

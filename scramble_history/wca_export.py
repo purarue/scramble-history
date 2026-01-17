@@ -3,15 +3,9 @@ import tempfile
 import zipfile
 import csv
 from typing import (
-    Dict,
-    Optional,
-    List,
     cast,
-    Set,
-    Tuple,
     NamedTuple,
     TypeVar,
-    Type,
 )
 from collections.abc import Iterator
 from dataclasses import dataclass

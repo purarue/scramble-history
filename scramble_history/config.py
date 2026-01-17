@@ -3,7 +3,7 @@ import warnings
 from pathlib import Path
 from glob import glob as do_glob
 from collections import defaultdict
-from typing import List, Union, Optional, Dict
+from typing import Union
 from collections.abc import Iterable, Mapping
 
 PathIsh = Union[Path, str]

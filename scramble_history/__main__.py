@@ -8,7 +8,7 @@ import enum
 import dataclasses
 import tempfile
 from pathlib import Path
-from typing import Any, List, Dict, Optional
+from typing import Any
 from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
@@ -66,7 +66,6 @@ def main() -> None:
     """
     parses your rubiks cube scramble history
     """
-    pass
 
 
 @main.group("utils", short_help="misc utilities")
@@ -136,7 +135,6 @@ def parse() -> None:
     """
     Parse the output of some file/directory
     """
-    pass
 
 
 @parse.command(short_help="parse cstimer.net export file")

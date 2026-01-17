@@ -4,7 +4,7 @@ import io
 from pathlib import Path
 from itertools import chain
 from decimal import Decimal
-from typing import NamedTuple, List, Dict, Any
+from typing import NamedTuple, Any
 from collections.abc import Iterator
 from datetime import datetime, timezone
 

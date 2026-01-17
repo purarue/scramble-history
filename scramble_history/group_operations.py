@@ -1,6 +1,6 @@
 from decimal import Decimal
 from statistics import mean, StatisticsError
-from typing import NamedTuple, Optional, List, Tuple, Dict, Union
+from typing import NamedTuple
 from math import inf
 
 from .models import State, Operation, Solve
